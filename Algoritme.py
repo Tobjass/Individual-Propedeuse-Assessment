@@ -29,11 +29,26 @@ def probeer_hand(bouwstapels, hand):
             verandering = True
     return bouwstapels, hand, verandering
 
+def probeer_weggooistapels(bouwstapels, weggooistapels):
+    verandering = False
+    print(weggooistapels)
+    for x in bouwstapels:
+        print(bouwstapels[x])
+        for y in weggooistapels:
+            if len(weggooistapels[y]) == 0:
+                continue
+            if (len(bouwstapels[x]) == 0 and weggooistapels[y][-1] == 1) or (len(bouwstapels[x]) > 0 and bouwstapels[x][-1] + 1 == weggooistapels[y][-1]):
+                bouwstapels[x].append(weggooistapels[y][-1])
+                weggooistapels[y] = weggooistapels[y][:-1]
+                verandering = True
+    return bouwstapels, weggooistapels, verandering
+
 trekstapel = [x % 12 + 1 for x in range(0, 144)]
 trekstapel += ["SB"] * 18
 shuffle(trekstapel)
 
 bouwstapels = {'A': [], 'B': [], 'C': [], 'D': []}
+weggooistapels = {'A': [], 'B': [], 'C': [], 'D': []}
 
 stok = trekstapel[:30]
 trekstapel = trekstapel[30:]
@@ -42,13 +57,10 @@ hand = trekstapel[:5]
 trekstapel = trekstapel[5:]
 
 bouwstapels, stok, verandering = probeer_stok(bouwstapels, stok)
-
 print(bouwstapels, verandering)
 
 bouwstapels, hand, verandering = probeer_hand(bouwstapels, hand)
-
 print(bouwstapels, verandering)
 
-
-
-
+bouwstapels, weggooistapels, verandering = probeer_weggooistapels(bouwstapels, weggooistapels)
+print(bouwstapels, verandering)
