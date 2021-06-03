@@ -4,7 +4,6 @@ def probeer_stok(bouwstapels, stok):
     verandering = False
     print(stok)
     for x in bouwstapels:
-        print(bouwstapels[x])
         if ((len(bouwstapels[x]) == 0 and stok[0] == 1) or (len(bouwstapels[x]) > 0 and bouwstapels[x][-1] + 1 == stok[0])) or stok[0] == "SB":
             bouwstapels[x].append(stok[0])
             stok = stok[1:]
@@ -15,7 +14,6 @@ def probeer_hand(bouwstapels, hand):
     verandering = False
     print(hand)
     for x in bouwstapels:
-        print(bouwstapels[x])
         index = None
         if "SB" in hand:
             index = hand.index("SB")
@@ -33,7 +31,6 @@ def probeer_weggooistapels(bouwstapels, weggooistapels):
     verandering = False
     print(weggooistapels)
     for x in bouwstapels:
-        print(bouwstapels[x])
         for y in weggooistapels:
             if len(weggooistapels[y]) == 0:
                 continue
@@ -56,11 +53,27 @@ trekstapel = trekstapel[30:]
 hand = trekstapel[:5]
 trekstapel = trekstapel[5:]
 
-bouwstapels, stok, verandering = probeer_stok(bouwstapels, stok)
-print(bouwstapels, verandering)
+while True:
+    bouwstapels, stok, stok_verandering = probeer_stok(bouwstapels, stok)
+    print("{}\n{}\n".format(bouwstapels, stok_verandering))
 
-bouwstapels, hand, verandering = probeer_hand(bouwstapels, hand)
-print(bouwstapels, verandering)
+    bouwstapels, hand, hand_verandering = probeer_hand(bouwstapels, hand)
+    print("{}\n{}\n".format(bouwstapels, hand_verandering))
 
-bouwstapels, weggooistapels, verandering = probeer_weggooistapels(bouwstapels, weggooistapels)
-print(bouwstapels, verandering)
+    bouwstapels, weggooistapels, weggooistapels_verandering = probeer_weggooistapels(bouwstapels, weggooistapels)
+    print("{}\n{}\n".format(bouwstapels, weggooistapels_verandering))
+
+    verandering = True if (stok_verandering or hand_verandering or weggooistapels_verandering) else False
+    print("Verandering: {}\n\n".format(verandering))
+
+    if verandering is False:
+        break
+
+for x in weggooistapels:
+    if len(weggooistapels[x]) == 0:
+        index = hand.index(max(hand))
+        weggooistapels[x].append(hand[index])
+        hand = hand[:index] + hand[index+1:]
+        break
+print(weggooistapels)
+print(hand)
