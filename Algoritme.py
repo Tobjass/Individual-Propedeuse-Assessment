@@ -2,14 +2,16 @@ from random import shuffle
 
 def probeer_stok(bouwstapels, stok):
     verandering = False
+    append = None
     print("Stok: {}".format(stok))
     for x in bouwstapels:
-        if stok[0] == "SB":
-            bouwstapels[x].append(1 if (len(bouwstapels) == 0) else bouwstapels[x][-1] + 1)
-            stok = stok[1:]
-            verandering = True
-        elif (len(bouwstapels[x]) == 0 and stok[0] == 1) or (len(bouwstapels[x]) > 0 and bouwstapels[x][-1] + 1 == stok[0]):
-            bouwstapels[x].append(stok[0])
+        if len(bouwstapels[x]) == 0:
+            append = 1 if (stok[0] != "SB") else "SB"
+        else:
+            if (bouwstapels[x][-1] == "SB" and bouwstapels[x][-2] + 2 == stok[0]) or bouwstapels[x][-1] + 1 == stok[0]:
+                append = stok[0]
+        if append is not None:
+            bouwstapels[x].append(append)
             stok = stok[1:]
             verandering = True
     return bouwstapels, stok, verandering
@@ -38,11 +40,16 @@ def probeer_weggooistapels(bouwstapels, weggooistapels, stok):
         for y in weggooistapels:
             if len(weggooistapels[y]) == 0:
                 continue
-            if ((len(bouwstapels[x]) == 0 and weggooistapels[y][-1] == 1) or (len(bouwstapels[x]) > 0 and bouwstapels[x][-1] + 1 == weggooistapels[y][-1])) and stok[0] != weggooistapels[y][-1]:
+            if ((len(bouwstapels[x]) == 0 and weggooistapels[y][-1] == 1) or (len(bouwstapels[x]) > 0 and bouwstapels[x][-1] + 1 == weggooistapels[y][-1])) and (stok[0] != weggooistapels[y][-1] and weggooistapels[y][-1] not in hand):
                 bouwstapels[x].append(weggooistapels[y][-1])
                 weggooistapels[y] = weggooistapels[y][:-1]
                 verandering = True
     return bouwstapels, weggooistapels, verandering
+
+def check_bouwstapels(bouwstapels):
+    for x in bouwstapels:
+        if len(bouwstapels[x]) > 0 and bouwstapels[x][-1] == 12:
+            bouwstapels[x]
 
 trekstapel = [x % 12 + 1 for x in range(0, 144)]
 trekstapel += ["SB"] * 18
@@ -57,7 +64,7 @@ trekstapel = trekstapel[30:]
 hand = trekstapel[:5]
 trekstapel = trekstapel[5:]
 
-for a in range(4):
+for a in range(10):
     print("Beurt {}\n".format(a+1))
 
     index = 5 - len(hand)
@@ -81,10 +88,15 @@ for a in range(4):
         if verandering is False:
             break
 
+    weggegooid = False
     for x in weggooistapels:
-        if len(weggooistapels[x]) == 0:
-            index = hand.index(max(hand))
+        index = hand.index(max(hand))
+        if len(weggooistapels[x]) == 0 or (len(weggooistapels[x]) > 0 and weggooistapels[x][-1] == hand[index]):
             weggooistapels[x].append(hand[index])
             hand = hand[:index] + hand[index+1:]
+            weggegooid = True
             break
+    if weggegooid is False:
+        weggooistapels['A'].append(hand[index])
+        hand = hand[:index] + hand[index + 1:]
     print("Weggooistapels: {}\nHand: {}\n\n".format(weggooistapels, hand))
