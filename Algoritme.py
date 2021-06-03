@@ -2,39 +2,43 @@ from random import shuffle
 
 def probeer_stok(bouwstapels, stok):
     verandering = False
-    print(stok)
+    print("Stok: {}".format(stok))
     for x in bouwstapels:
-        if ((len(bouwstapels[x]) == 0 and stok[0] == 1) or (len(bouwstapels[x]) > 0 and bouwstapels[x][-1] + 1 == stok[0])) or stok[0] == "SB":
+        if stok[0] == "SB":
+            bouwstapels[x].append(1 if (len(bouwstapels) == 0) else bouwstapels[x][-1] + 1)
+            stok = stok[1:]
+            verandering = True
+        elif (len(bouwstapels[x]) == 0 and stok[0] == 1) or (len(bouwstapels[x]) > 0 and bouwstapels[x][-1] + 1 == stok[0]):
             bouwstapels[x].append(stok[0])
             stok = stok[1:]
             verandering = True
     return bouwstapels, stok, verandering
 
-def probeer_hand(bouwstapels, hand):
+def probeer_hand(bouwstapels, hand, stok):
     verandering = False
-    print(hand)
+    print("Hand: {}".format(hand))
     for x in bouwstapels:
         index = None
         if "SB" in hand:
             index = hand.index("SB")
-        elif len(bouwstapels[x]) == 0 and 1 in hand:
+        elif (len(bouwstapels[x]) == 0 and 1 in hand) and stok[0] != 1:
             index = hand.index(1)
-        elif len(bouwstapels[x]) > 0 and bouwstapels[x][-1] + 1 in hand:
+        elif (len(bouwstapels[x]) > 0 and bouwstapels[x][-1] + 1 in hand) and stok[0] != bouwstapels[x][-1] + 1:
             index = hand.index(bouwstapels[x][len(bouwstapels[x]) - 1] + 1)
         if index is not None:
-            bouwstapels[x].append(hand[index])
+            bouwstapels[x].append(1 if (hand[index] == "SB" and len(bouwstapels[x]) == 0) else (bouwstapels[x][-1] + 1 if (hand[index] == "SB") else hand[index]))
             hand = hand[:index] + hand[index+1:]
             verandering = True
     return bouwstapels, hand, verandering
 
-def probeer_weggooistapels(bouwstapels, weggooistapels):
+def probeer_weggooistapels(bouwstapels, weggooistapels, stok):
     verandering = False
-    print(weggooistapels)
+    print("Weggooistapels: {}".format(weggooistapels))
     for x in bouwstapels:
         for y in weggooistapels:
             if len(weggooistapels[y]) == 0:
                 continue
-            if (len(bouwstapels[x]) == 0 and weggooistapels[y][-1] == 1) or (len(bouwstapels[x]) > 0 and bouwstapels[x][-1] + 1 == weggooistapels[y][-1]):
+            if ((len(bouwstapels[x]) == 0 and weggooistapels[y][-1] == 1) or (len(bouwstapels[x]) > 0 and bouwstapels[x][-1] + 1 == weggooistapels[y][-1])) and stok[0] != weggooistapels[y][-1]:
                 bouwstapels[x].append(weggooistapels[y][-1])
                 weggooistapels[y] = weggooistapels[y][:-1]
                 verandering = True
@@ -53,27 +57,34 @@ trekstapel = trekstapel[30:]
 hand = trekstapel[:5]
 trekstapel = trekstapel[5:]
 
-while True:
-    bouwstapels, stok, stok_verandering = probeer_stok(bouwstapels, stok)
-    print("{}\n{}\n".format(bouwstapels, stok_verandering))
+for a in range(4):
+    print("Beurt {}\n".format(a+1))
 
-    bouwstapels, hand, hand_verandering = probeer_hand(bouwstapels, hand)
-    print("{}\n{}\n".format(bouwstapels, hand_verandering))
+    index = 5 - len(hand)
+    if index > 0:
+        for kaart in trekstapel[:index]:
+            hand.append(kaart)
+        trekstapel = trekstapel[index:]
+    while True:
+        bouwstapels, stok, stok_verandering = probeer_stok(bouwstapels, stok)
+        print("Bouwstapels: {}\nVerandering in stok: {}\n".format(bouwstapels, stok_verandering))
 
-    bouwstapels, weggooistapels, weggooistapels_verandering = probeer_weggooistapels(bouwstapels, weggooistapels)
-    print("{}\n{}\n".format(bouwstapels, weggooistapels_verandering))
+        bouwstapels, hand, hand_verandering = probeer_hand(bouwstapels, hand, stok)
+        print("Bouwstapels: {}\nVerandering in hand: {}\n".format(bouwstapels, hand_verandering))
 
-    verandering = True if (stok_verandering or hand_verandering or weggooistapels_verandering) else False
-    print("Verandering: {}\n\n".format(verandering))
+        bouwstapels, weggooistapels, weggooistapels_verandering = probeer_weggooistapels(bouwstapels, weggooistapels, stok)
+        print("Bouwstapels: {}\nVerandering in weggooistapels: {}\n".format(bouwstapels, weggooistapels_verandering))
 
-    if verandering is False:
-        break
+        verandering = True if (stok_verandering or hand_verandering or weggooistapels_verandering) else False
+        print("Verandering: {}\n\n".format(verandering))
 
-for x in weggooistapels:
-    if len(weggooistapels[x]) == 0:
-        index = hand.index(max(hand))
-        weggooistapels[x].append(hand[index])
-        hand = hand[:index] + hand[index+1:]
-        break
-print(weggooistapels)
-print(hand)
+        if verandering is False:
+            break
+
+    for x in weggooistapels:
+        if len(weggooistapels[x]) == 0:
+            index = hand.index(max(hand))
+            weggooistapels[x].append(hand[index])
+            hand = hand[:index] + hand[index+1:]
+            break
+    print("Weggooistapels: {}\nHand: {}\n\n".format(weggooistapels, hand))
