@@ -32,6 +32,7 @@ def kleinste_weggooistapel(weggooistapels):
     kleinste = None
     for x in weggooistapels:
         if len(weggooistapels[x]) > len_kleinste:
+            len_kleinste = len(weggooistapels[x])
             kleinste = x
     return kleinste
 
@@ -79,20 +80,27 @@ def probeer_hand(bouwstapels, hand, stok):
     verandering = False
     print("Hand: {}".format(hand))
     for x in bouwstapels:
-        append = None
-        if bovenste_kaart_bouwstapel(bouwstapels[x]) == 0:
-            if ("SB" not in hand and 1 not in hand) or stok[0] == 1:
-                continue
-            append = "SB" if ("SB" in hand) else 1
-        else:
-            if bovenste_kaart_bouwstapel(bouwstapels[x]) + 1 in hand and stok[0] != bovenste_kaart_bouwstapel(bouwstapels[x]) + 1:
-                append = bovenste_kaart_bouwstapel(bouwstapels[x]) + 1
-            elif "SB" in hand and stok[0] != bovenste_kaart_bouwstapel(bouwstapels[x]) + 1:
-                append = "SB"
-        if append is not None:
-            bouwstapels[x].append(append)
-            hand = hand[:hand.index(append)] + hand[hand.index(append)+1:]
-            verandering = True
+        while True:
+            append = None
+            bool = False
+            if bovenste_kaart_bouwstapel(bouwstapels[x]) == 0:
+                if ("SB" not in hand and 1 not in hand) or stok[0] == 1:
+                    break
+                bool = True
+                append = "SB" if ("SB" in hand) else 1
+            else:
+                if bovenste_kaart_bouwstapel(bouwstapels[x]) + 1 in hand and stok[0] != bovenste_kaart_bouwstapel(bouwstapels[x]) + 1:
+                    bool = True
+                    append = bovenste_kaart_bouwstapel(bouwstapels[x]) + 1
+                elif "SB" in hand and stok[0] != bovenste_kaart_bouwstapel(bouwstapels[x]) + 1:
+                    bool = True
+                    append = "SB"
+            if append is not None:
+                bouwstapels[x].append(append)
+                hand = hand[:hand.index(append)] + hand[hand.index(append)+1:]
+                verandering = True
+            if bool is False:
+                break
     return bouwstapels, hand, verandering
 
 def probeer_weggooistapels(bouwstapels, weggooistapels, stok):
