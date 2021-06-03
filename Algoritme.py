@@ -5,3 +5,11 @@ trekstapel += ["SB"] * 18
 shuffle(trekstapel)
 
 print(trekstapel)
+
+kaarten = trekstapel[:5]
+trekstapel = trekstapel[5:]
+
+print(kaarten)
+print(trekstapel)
+
+bouwstapels = {'A': [], 'B': [], 'C': [], 'D': []}
