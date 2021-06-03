@@ -10,6 +10,23 @@ def bovenste_kaart_bouwstapel(bouwstapel):
     else:
         return bouwstapel[-1]
 
+def check_bouwstapels(bouwstapels, trekstapel):
+    for x in bouwstapels:
+        if bovenste_kaart_bouwstapel(bouwstapels[x]) == 12:
+            for kaart in bouwstapels[x]:
+                trekstapel.append(kaart)
+            shuffle(trekstapel)
+            bouwstapels[x] = []
+    return bouwstapels, trekstapel
+
+def trek_kaarten(hand, trekstapel):
+    index = 5 - len(hand)
+    if index > 0:
+        for kaart in trekstapel[:index]:
+            hand.append(kaart)
+        trekstapel = trekstapel[index:]
+    return hand, trekstapel
+
 def probeer_stok(bouwstapels, stok):
     verandering = False
     append = None
@@ -59,15 +76,6 @@ def probeer_weggooistapels(bouwstapels, weggooistapels, stok):
                 verandering = True
     return bouwstapels, weggooistapels, verandering
 
-def check_bouwstapels(bouwstapels, trekstapel):
-    for x in bouwstapels:
-        if bovenste_kaart_bouwstapel(bouwstapels[x]) == 12:
-            for kaart in bouwstapels[x]:
-                trekstapel.append(kaart)
-            shuffle(trekstapel)
-            bouwstapels[x] = []
-    return bouwstapels, trekstapel
-
 trekstapel = [x % 12 + 1 for x in range(0, 144)]
 trekstapel += ["SB"] * 18
 shuffle(trekstapel)
@@ -86,11 +94,7 @@ for a in range(10):
 
     print("Beurt {}\n".format(a+1))
 
-    index = 5 - len(hand)
-    if index > 0:
-        for kaart in trekstapel[:index]:
-            hand.append(kaart)
-        trekstapel = trekstapel[index:]
+    hand = trek_kaarten(hand, trekstapel)
     while True:
         bouwstapels, stok, stok_verandering = probeer_stok(bouwstapels, stok)
         print("Bouwstapels: {}\nVerandering in stok: {}\n".format(bouwstapels, stok_verandering))
