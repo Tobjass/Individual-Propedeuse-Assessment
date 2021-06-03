@@ -27,6 +27,28 @@ def trek_kaarten(hand, trekstapel):
         trekstapel = trekstapel[index:]
     return hand, trekstapel
 
+def kleinste_weggooistapel(weggooistapels):
+    len_kleinste = 0
+    kleinste = None
+    for x in weggooistapels:
+        if len(weggooistapels[x]) > len_kleinste:
+            kleinste = x
+    return kleinste
+
+def kaart_wegleggen(hand, weggooistapels):
+    weggegooid = False
+    for x in weggooistapels:
+        index = hand.index(max(hand))
+        if len(weggooistapels[x]) == 0 or (len(weggooistapels[x]) > 0 and weggooistapels[x][-1] == hand[index]):
+            weggooistapels[x].append(hand[index])
+            hand = hand[:index] + hand[index + 1:]
+            weggegooid = True
+            break
+    if weggegooid is False:
+        weggooistapels[kleinste_weggooistapel(weggooistapels)].append(hand[index])
+        hand = hand[:index] + hand[index + 1:]
+    return hand, weggooistapels
+
 def probeer_stok(bouwstapels, stok):
     verandering = False
     append = None
@@ -70,7 +92,7 @@ def probeer_weggooistapels(bouwstapels, weggooistapels, stok):
         for y in weggooistapels:
             if len(weggooistapels[y]) == 0:
                 continue
-            if ((bovenste_kaart_bouwstapel(bouwstapels[x]) == 0 and weggooistapels[y][-1] == 1) or (bovenste_kaart_bouwstapel(bouwstapels[x]) + 1 == weggooistapels[y][-1])) and (stok[0] != weggooistapels[y][-1] and weggooistapels[y][-1] not in hand)
+            if ((bovenste_kaart_bouwstapel(bouwstapels[x]) == 0 and weggooistapels[y][-1] == 1) or (bovenste_kaart_bouwstapel(bouwstapels[x]) + 1 == weggooistapels[y][-1])) and (stok[0] != weggooistapels[y][-1] and weggooistapels[y][-1] not in hand):
                 bouwstapels[x].append(weggooistapels[y][-1])
                 weggooistapels[y] = weggooistapels[y][:-1]
                 verandering = True
@@ -94,7 +116,7 @@ for a in range(10):
 
     print("Beurt {}\n".format(a+1))
 
-    hand = trek_kaarten(hand, trekstapel)
+    hand, trekstapel = trek_kaarten(hand, trekstapel)
     while True:
         bouwstapels, stok, stok_verandering = probeer_stok(bouwstapels, stok)
         print("Bouwstapels: {}\nVerandering in stok: {}\n".format(bouwstapels, stok_verandering))
@@ -111,15 +133,5 @@ for a in range(10):
         if verandering is False:
             break
 
-    weggegooid = False
-    for x in weggooistapels:
-        index = hand.index(max(hand))
-        if len(weggooistapels[x]) == 0 or (len(weggooistapels[x]) > 0 and weggooistapels[x][-1] == hand[index]):
-            weggooistapels[x].append(hand[index])
-            hand = hand[:index] + hand[index+1:]
-            weggegooid = True
-            break
-    if weggegooid is False:
-        weggooistapels['A'].append(hand[index])
-        hand = hand[:index] + hand[index + 1:]
+    hand, weggooistapels = kaart_wegleggen(hand, weggooistapels)
     print("Weggooistapels: {}\nHand: {}\n\n".format(weggooistapels, hand))
