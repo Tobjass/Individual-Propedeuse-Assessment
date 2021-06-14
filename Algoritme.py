@@ -63,6 +63,13 @@ def kaart_wegleggen(hand, weggooistapels):
     hand += ["SB"] * sb_count
     return hand, weggooistapels
 
+def dichtste_bij_stok(bouwstapels, stok):
+    meest_dichtbij = 'A'
+    for x in bouwstapels:
+        if vergelijk_bouwstapels(bouwstapels[x], stok) and bovenste_kaart_bouwstapel(bouwstapels[meest_dichtbij]) < bovenste_kaart_bouwstapel(bouwstapels[x]):
+            meest_dichtbij = x
+    return meest_dichtbij
+
 def probeer_stok(bouwstapels, stok):
     verandering = False
     print("Stok: {}".format(stok))
@@ -151,6 +158,8 @@ hand = trekstapel[:5]
 trekstapel = trekstapel[5:]
 
 for beurt in range(50):
+    print("Bouwstapel {} is het dichtste bij de stok".format(dichtste_bij_stok(bouwstapels, stok)))
+
     check_bouwstapels(bouwstapels, trekstapel)
 
     print("Beurt {}\n".format(beurt+1))
