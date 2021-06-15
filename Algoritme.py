@@ -11,13 +11,13 @@ def bovenste_kaart_bouwstapel(bouwstapel):
         return bouwstapel[-1]
 
 def check_bouwstapels(bouwstapels, trekstapel):
-    for x in bouwstapels:
-        if bovenste_kaart_bouwstapel(bouwstapels[x]) == 12:
-            print("\nBouwstapel {} heeft 12 behaald en wordt geleegd".format(x))
-            for kaart in bouwstapels[x]:
+    for stapel in bouwstapels:
+        if bovenste_kaart_bouwstapel(bouwstapels[stapel]) == 12:
+            print("\nBouwstapel {} heeft 12 behaald en wordt geleegd".format(stapel))
+            for kaart in bouwstapels[stapel]:
                 trekstapel.append(kaart)
             shuffle(trekstapel)
-            bouwstapels[x] = []
+            bouwstapels[stapel] = []
     return bouwstapels, trekstapel
 
 def trek_kaarten(hand, trekstapel):
@@ -33,10 +33,10 @@ def kleinste_weggooistapel(weggooistapels):
         return 'A'
     len_kleinste = 100
     kleinste = None
-    for x in weggooistapels:
-        if len(weggooistapels[x]) < len_kleinste:
-            len_kleinste = len(weggooistapels[x])
-            kleinste = x
+    for stapel in weggooistapels:
+        if len(weggooistapels[stapel]) < len_kleinste:
+            len_kleinste = len(weggooistapels[stapel])
+            kleinste = stapel
     return kleinste
 
 def check_weggooistapel(stapel):
@@ -82,30 +82,12 @@ def kaart_wegleggen(hand, weggooistapels):
     hand = hand[:index] + hand[index + 1:]
     return hand, weggooistapels
 
-    # weggegooid = False
-    # for x in weggooistapels:
-    #     sb_count = hand.count("SB")
-    #     if "SB" in hand:
-    #         for y in range(sb_count):
-    #             hand.remove("SB")
-    #     index = hand.index(max(hand))
-    #     if len(weggooistapels[x]) == 0 or (len(weggooistapels[x]) > 0 and weggooistapels[x][-1] == hand[index]):
-    #         weggooistapels[x].append(hand[index])
-    #         hand = hand[:index] + hand[index+1:]
-    #         weggegooid = True
-    #         break
-    # if weggegooid is False:
-    #     weggooistapels[kleinste_weggooistapel(weggooistapels)].append(hand[index])
-    #     hand = hand[:index] + hand[index+1:]
-    # hand += ["SB"] * sb_count
-    # return hand, weggooistapels
-
 def check_weggooistapels(weggooistapels, kaart):
-    for x in weggooistapels:
-        if not weggooistapels[x]:
+    for stapel in weggooistapels:
+        if not weggooistapels[stapel]:
             continue
-        if weggooistapels[x][-1] == kaart:
-            return True, x
+        if weggooistapels[stapel][-1] == kaart:
+            return True, stapel
     return False, None
 
 def beschikbare_kaarten(hand, weggooistapels):
@@ -123,13 +105,13 @@ def dichtste_bij_stok(bouwstapels, stok, hand, weggooistapels):
                 return stapel
 
     kleinste_verschil = 13
-    for x in bouwstapels:
-        verschil = stok[0] - bovenste_kaart_bouwstapel(bouwstapels[x])
+    for stapel in bouwstapels:
+        verschil = stok[0] - bovenste_kaart_bouwstapel(bouwstapels[stapel])
         if verschil <= 0:
             verschil += 12
         if verschil < kleinste_verschil:
             kleinste_verschil = verschil
-            meest_dichtbij = x
+            meest_dichtbij = stapel
     return meest_dichtbij
 
 def pad_maken(bouwstapels, stok, hand, weggooistapels):
@@ -165,16 +147,16 @@ def pad_maken(bouwstapels, stok, hand, weggooistapels):
     return pad
 
 def pad_toepassen(pad, bouwstapel, stok, hand, weggooistapels):
-    for x in pad:
-        if x[0] == "stok":
-            bouwstapel.append(stok[x[1]])
+    for stap in pad:
+        if stap[0] == "stok":
+            bouwstapel.append(stok[stap[1]])
             stok = stok[1:]
-        elif x[0] == "hand":
-            bouwstapel.append(hand[x[1]])
-            hand = hand[:x[1]] + hand[x[1] + 1:]
-        elif x[0] == "weggooistapel":
-            bouwstapel.append(weggooistapels[x[1]][-1])
-            weggooistapels[x[1]] = weggooistapels[x[1]][:-1]
+        elif stap[0] == "hand":
+            bouwstapel.append(hand[stap[1]])
+            hand = hand[:stap[1]] + hand[stap[1] + 1:]
+        elif stap[0] == "weggooistapel":
+            bouwstapel.append(weggooistapels[stap[1]][-1])
+            weggooistapels[stap[1]] = weggooistapels[stap[1]][:-1]
     return bouwstapel, stok, hand, weggooistapels
 
 def run():
