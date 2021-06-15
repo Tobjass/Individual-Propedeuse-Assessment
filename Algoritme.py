@@ -63,12 +63,53 @@ def kaart_wegleggen(hand, weggooistapels):
     hand += ["SB"] * sb_count
     return hand, weggooistapels
 
+def check_weggooistapels(weggooistapels, kaart):
+    for x in weggooistapels:
+        if not weggooistapels[x]:
+            continue
+        if weggooistapels[x][-1] == kaart:
+            return True, x
+    return False, None
+
 def dichtste_bij_stok(bouwstapels, stok):
+    if stok[0] == 'SB':
+        return 'A'
     meest_dichtbij = 'A'
     for x in bouwstapels:
         if vergelijk_bouwstapels(bouwstapels[x], stok) and bovenste_kaart_bouwstapel(bouwstapels[meest_dichtbij]) < bovenste_kaart_bouwstapel(bouwstapels[x]):
             meest_dichtbij = x
     return meest_dichtbij
+
+def stok_mogelijkheid(bouwstapels, stok, hand, weggooistapels):
+    if stok[0] == "SB":
+        return []
+
+    mogelijkheid = False
+
+    dichtste_bij = dichtste_bij_stok(bouwstapels, stok)
+    bovenste = bovenste_kaart_bouwstapel(bouwstapels[dichtste_bij])
+    verschil = stok[0] - bovenste
+
+    temp_hand = hand.copy()
+    temp_weggooistapels = weggooistapels.copy()
+
+    pad = []
+    for kaart in range(1, verschil):
+        if bovenste + kaart in temp_hand:
+            pad.append(["hand", temp_hand.index(bovenste + kaart)])
+            temp_hand.remove(bovenste + kaart)
+            continue
+        weggooistapel = check_weggooistapels(temp_weggooistapels, bovenste + kaart)
+        if weggooistapel[0]:
+            pad.append(["weggooistapel", weggooistapel[1]])
+            temp_weggooistapels[weggooistapel[1]] = temp_weggooistapels[weggooistapel[1]][-1:]
+            continue
+        elif "SB" in temp_hand:
+            pad.append(["hand", temp_hand.index("SB")])
+            temp_hand.remove("SB")
+            continue
+        break
+    return pad
 
 def probeer_stok(bouwstapels, stok):
     verandering = False
@@ -158,13 +199,15 @@ hand = trekstapel[:5]
 trekstapel = trekstapel[5:]
 
 for beurt in range(50):
-    print("Bouwstapel {} is het dichtste bij de stok".format(dichtste_bij_stok(bouwstapels, stok)))
-
     check_bouwstapels(bouwstapels, trekstapel)
 
     print("Beurt {}\n".format(beurt+1))
 
     hand, trekstapel = trek_kaarten(hand, trekstapel)
+
+    print("Hand: {}".format(hand))
+    print("Bouwstapel {} is het dichtste bij de stok\nPad: {}\n".format(dichtste_bij_stok(bouwstapels, stok), stok_mogelijkheid(bouwstapels, stok, hand, weggooistapels)))
+
     while True:
         bouwstapels, stok, stok_verandering = probeer_stok(bouwstapels, stok)
         print("Bouwstapels: {}\nVerandering in stok: {}\n".format(bouwstapels, stok_verandering))
