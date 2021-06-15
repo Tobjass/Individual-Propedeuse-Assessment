@@ -13,6 +13,7 @@ def bovenste_kaart_bouwstapel(bouwstapel):
 def check_bouwstapels(bouwstapels, trekstapel):
     for x in bouwstapels:
         if bovenste_kaart_bouwstapel(bouwstapels[x]) == 12:
+            print("\nBouwstapel {} heeft 12 behaald en wordt geleegd".format(x))
             for kaart in bouwstapels[x]:
                 trekstapel.append(kaart)
             shuffle(trekstapel)
@@ -57,7 +58,6 @@ def kaart_wegleggen(hand, weggooistapels):
         for stapel in weggooistapels:
             if optie == 0 and (len(weggooistapels[stapel]) > 0 and (check_weggooistapel(weggooistapels[stapel]) and weggooistapels[stapel][-1] in hand)):
                 index = hand.index(weggooistapels[stapel][-1])
-                weggooistapel = stapel
                 break
             elif optie == 1 and len(weggooistapels[stapel]) == 0:
                 for handoptie in range(2):
@@ -67,11 +67,9 @@ def kaart_wegleggen(hand, weggooistapels):
                             break
                     if index is not None:
                         break
-                weggooistapel = stapel
                 break
             elif optie == 2 and (len(weggooistapels[stapel]) > 0 and weggooistapels[stapel][-1] - 1 in hand):
                 index = hand.index(weggooistapels[stapel][-1] - 1)
-                weggooistapel = stapel
                 break
             elif optie == 3:
                 index = 0
@@ -79,12 +77,14 @@ def kaart_wegleggen(hand, weggooistapels):
                     if kaart != "SB":
                         index = hand.index(kaart)
                         break
+                print("Kaart {} wordt naar weggooistapel {} verplaatst\n\n".format(hand[index], kleinste_weggooistapel(weggooistapels)))
                 weggooistapels[kleinste_weggooistapel(weggooistapels)].append(hand[index])
                 hand = hand[:index] + hand[index + 1:]
                 return hand, weggooistapels
         if index is not None:
             break
-    weggooistapels[weggooistapel].append(hand[index])
+    print("Kaart {} wordt naar weggooistapel {} verplaatst\n\n".format(hand[index], stapel))
+    weggooistapels[stapel].append(hand[index])
     hand = hand[:index] + hand[index + 1:]
     return hand, weggooistapels
 
@@ -114,14 +114,25 @@ def check_weggooistapels(weggooistapels, kaart):
             return True, x
     return False, None
 
-def dichtste_bij_stok(bouwstapels, stok):
+def beschikbare_kaarten(hand, weggooistapels):
+    for stapel in weggooistapels:
+        if len(weggooistapels[stapel]) > 0:
+            hand.append(weggooistapels[stapel][-1])
+    return hand
+
+def dichtste_bij_stok(bouwstapels, stok, hand, weggooistapels):
     if stok[0] == 'SB':
-        return 'A'
+        for stapel in bouwstapels:
+            if bovenste_kaart_bouwstapel(bouwstapels[stapel]) + 1 in beschikbare_kaarten(hand, weggooistapels):
+                continue
+            elif bovenste_kaart_bouwstapel(bouwstapels[stapel]) + 1 not in beschikbare_kaarten(hand, weggooistapels):
+                return stapel
+
     kleinste_verschil = 13
     for x in bouwstapels:
         verschil = stok[0] - bovenste_kaart_bouwstapel(bouwstapels[x])
         if verschil <= 0:
-            verschil += 11
+            verschil += 12
         if verschil < kleinste_verschil:
             kleinste_verschil = verschil
             meest_dichtbij = x
@@ -131,7 +142,7 @@ def pad_maken(bouwstapels, stok, hand, weggooistapels):
     if stok[0] == "SB":
         return [["stok", 0]]
 
-    dichtste_bij = dichtste_bij_stok(bouwstapels, stok)
+    dichtste_bij = dichtste_bij_stok(bouwstapels, stok, hand, weggooistapels)
     bovenste = bovenste_kaart_bouwstapel(bouwstapels[dichtste_bij])
     verschil = stok[0] - bovenste + 1
 
@@ -244,49 +255,42 @@ def probeer_weggooistapels(bouwstapels, weggooistapels, stok):
     return bouwstapels, weggooistapels, verandering
 
 def run():
-    # trekstapel = [x % 12 + 1 for x in range(0, 144)]
-    # trekstapel += ["SB"] * 18
-    # shuffle(trekstapel)
+    trekstapel = [x % 12 + 1 for x in range(0, 144)]
+    trekstapel += ["SB"] * 18
+    shuffle(trekstapel)
 
     bouwstapels = {'A': [], 'B': [], 'C': [], 'D': []}
-    weggooistapels = {'A': [3, 2], 'B': [4, 3, 1], 'C': [6], 'D': [2, 1]}
+    weggooistapels = {'A': [], 'B': [], 'C': [], 'D': []}
 
-    trekstapel = [8, 'SB', 11, 9, 12, 2, 7, 9, 9, 8, 9, 8, 8, 2, 'SB', 3, 11, 'SB', 2, 1, 'SB', 6, 4, 5, 'SB', 2, 3, 6, 6, 10, 1, 3, 6, 4, 7, 1, 4, 12, 2, 4, 4, 6, 'SB', 9, 5, 'SB', 3, 9, 1, 4, 10, 7, 12, 12, 4, 5, 11, 4, 'SB', 11, 7, 10, 11, 6, 2, 'SB', 10, 3, 8, 9, 5, 'SB', 8, 3, 12, 3, 11, 6, 'SB', 'SB', 11, 7, 2, 7, 8, 8, 4, 1, 6, 12, 5, 7, 11, 1, 6, 4, 6, 8, 10, 7, 12, 1, 2, 5, 3, 3, 7, 'SB', 1, 9, 12, 8, 10, 7, 9, 10, 9, 7, 5, 10, 3, 4, 3, 5, 'SB', 5, 8, 9, 12, 'SB', 2, 2]
-    stok = [9, 10, 5, 'SB', 7, 1, 6, 1, 3, 8, 11, 11, 1, 12, 5, 5, 'SB', 12, 10, 11, 10, 'SB', 11, 2, 1, 10, 2, 6, 4, 12]
-    hand = ['SB', 8, 11, 9, 12]
+    stok = trekstapel[:30]
+    trekstapel = trekstapel[30:]
 
-    # stok = trekstapel[:30]
-    # trekstapel = trekstapel[30:]
+    hand = trekstapel[:5]
+    trekstapel = trekstapel[5:]
 
-    # hand = trekstapel[:5]
-    # trekstapel = trekstapel[5:]
+    for beurt in range(50):
+        print("----- Beurt {} -----".format(beurt + 1))
+        hand, trekstapel = trek_kaarten(hand, trekstapel)
 
-    print(hand)
+        while True:
+            bouwstapels, trekstapel = check_bouwstapels(bouwstapels, trekstapel)
 
-    hand, weggooistapels = kaart_wegleggen(hand, weggooistapels)
+            if not hand:
+                hand, trekstapel = trek_kaarten(hand, trekstapel)
 
-    print(weggooistapels)
-    print(hand)
+            dichtste_bij = dichtste_bij_stok(bouwstapels, stok, hand, weggooistapels)
+            pad = pad_maken(bouwstapels, stok, hand, weggooistapels)
 
-    # for beurt in range(10):
-    #     print("Beurt {}".format(beurt + 1))
-    #     hand, trekstapel = trek_kaarten(hand, trekstapel)
-    #
-    #     while True:
-    #         if not hand:
-    #             hand, trekstapel = trek_kaarten(hand, trekstapel)
-    #
-    #         dichtste_bij = dichtste_bij_stok(bouwstapels, stok)
-    #         pad = pad_maken(bouwstapels, stok, hand, weggooistapels)
-    #
-    #         print("\nStok: {}\nBouwstapels: {}\nHand: {}\nWeggooistapels: {}\n\nBouwstapel {} is het dichtste bij de stok\nPad: {}\n".format(stok[0], bouwstapels, hand, weggooistapels, dichtste_bij, pad))
-    #
-    #         if not pad:
-    #             break
-    #
-    #         bouwstapels[dichtste_bij], stok, hand, weggooistapels = pad_toepassen(pad, bouwstapels[dichtste_bij], stok, hand, weggooistapels)
-    #
-    #         print("Na toepassen van pad:\n\nStok: {}\nBouwstapels: {}\nHand: {}\nWeggooistapels: {}".format(stok, bouwstapels, hand, weggooistapels))
+            print("\nStok: {}\nBouwstapels: {}\nHand: {}\nWeggooistapels: {}\n\nBouwstapel {} is het dichtste bij de stok\nPad: {}\n".format(stok[0], bouwstapels, hand, weggooistapels, dichtste_bij, pad))
+
+            if not pad:
+                break
+
+            bouwstapels[dichtste_bij], stok, hand, weggooistapels = pad_toepassen(pad, bouwstapels[dichtste_bij], stok, hand, weggooistapels)
+
+            print("Na toepassen van pad:\n\nStok: {}\nBouwstapels: {}\nHand: {}\nWeggooistapels: {}".format(stok[0], bouwstapels, hand, weggooistapels))
+
+        hand, weggooistapels = kaart_wegleggen(hand, weggooistapels)
 
     # for beurt in range(50):
     #     check_bouwstapels(bouwstapels, trekstapel)
