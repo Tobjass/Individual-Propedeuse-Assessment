@@ -74,25 +74,32 @@ def check_weggooistapels(weggooistapels, kaart):
 def dichtste_bij_stok(bouwstapels, stok):
     if stok[0] == 'SB':
         return 'A'
-    meest_dichtbij = 'A'
+    kleinste_verschil = 13
     for x in bouwstapels:
-        if vergelijk_bouwstapels(bouwstapels[x], stok) and bovenste_kaart_bouwstapel(bouwstapels[meest_dichtbij]) > bovenste_kaart_bouwstapel(bouwstapels[x]):
+        verschil = stok[0] - bovenste_kaart_bouwstapel(bouwstapels[x])
+        if verschil <= 0:
+            verschil += 11
+        if verschil < kleinste_verschil:
+            kleinste_verschil = verschil
             meest_dichtbij = x
     return meest_dichtbij
 
 def pad_maken(bouwstapels, stok, hand, weggooistapels):
     if stok[0] == "SB":
-        return []
+        return [["stok", 0]]
 
     dichtste_bij = dichtste_bij_stok(bouwstapels, stok)
     bovenste = bovenste_kaart_bouwstapel(bouwstapels[dichtste_bij])
-    verschil = stok[0] - bovenste
+    verschil = stok[0] - bovenste + 1
 
     temp_hand = hand.copy()
     temp_weggooistapels = weggooistapels.copy()
 
     pad = []
     for kaart in range(1, verschil):
+        if bovenste + kaart == stok[0]:
+            pad.append(["stok", 0])
+            break
         if bovenste + kaart in temp_hand:
             pad.append(["hand", temp_hand.index(bovenste + kaart)])
             temp_hand.remove(bovenste + kaart)
@@ -111,13 +118,16 @@ def pad_maken(bouwstapels, stok, hand, weggooistapels):
 
 def pad_toepassen(pad, bouwstapel, stok, hand, weggooistapels):
     if not pad:
-        return bouwstapel
+        return bouwstapel, stok, hand, weggooistapels
 
     for x in pad:
-        if x[0] == 'hand':
+        if x[0] == "stok":
+            bouwstapel.append(stok[x[1]])
+            stok = stok[1:]
+        elif x[0] == "hand":
             bouwstapel.append(hand[x[1]])
             hand = hand[:x[1]] + hand[x[1] + 1:]
-        elif x[0] == 'weggooistapel':
+        elif x[0] == "weggooistapel":
             bouwstapel.append(weggooistapels[x[1]][-1])
             weggooistapels[x[1]] = weggooistapels[x[1]][:-1]
     return bouwstapel, stok, hand, weggooistapels
@@ -217,14 +227,15 @@ def run():
     # hand = trekstapel[:5]
     # trekstapel = trekstapel[5:]
 
-    print("\nHand: {}".format(hand))
-    dichtste_bij = dichtste_bij_stok(bouwstapels, stok)
-    pad = pad_maken(bouwstapels, stok, hand, weggooistapels)
-    print("Bouwstapel {} is het dichtste bij de stok\nPad: {}\n".format(dichtste_bij, pad))
+    for a in range(4):
+        print("\nHand: {}".format(hand))
+        dichtste_bij = dichtste_bij_stok(bouwstapels, stok)
+        pad = pad_maken(bouwstapels, stok, hand, weggooistapels)
+        print("Bouwstapel {} is het dichtste bij de stok\nPad: {}\n".format(dichtste_bij, pad))
 
-    bouwstapels[dichtste_bij], stok, hand, weggooistapels = pad_toepassen(pad, bouwstapels[dichtste_bij], stok, hand, weggooistapels)
+        bouwstapels[dichtste_bij], stok, hand, weggooistapels = pad_toepassen(pad, bouwstapels[dichtste_bij], stok, hand, weggooistapels)
 
-    print("\nStok: {}\nBouwstapels: {}\nHand: {}\nWeggooistapels: {}".format(stok, bouwstapels, hand, weggooistapels))
+        print("Stok: {}\nBouwstapels: {}\nHand: {}\nWeggooistapels: {}".format(stok, bouwstapels, hand, weggooistapels))
 
     # for beurt in range(50):
     #     check_bouwstapels(bouwstapels, trekstapel)
