@@ -91,10 +91,11 @@ def check_weggooistapels(weggooistapels, kaart):
     return False, None
 
 def beschikbare_kaarten(hand, weggooistapels):
+    temp = hand.copy()
     for stapel in weggooistapels:
         if len(weggooistapels[stapel]) > 0:
-            hand.append(weggooistapels[stapel][-1])
-    return hand
+            temp.append(weggooistapels[stapel][-1])
+    return temp
 
 def dichtste_bij_stok(bouwstapels, stok, hand, weggooistapels):
     if stok[0] == 'SB':
@@ -121,6 +122,9 @@ def pad_maken(bouwstapels, stok, hand, weggooistapels):
     dichtste_bij = dichtste_bij_stok(bouwstapels, stok, hand, weggooistapels)
     bovenste = bovenste_kaart_bouwstapel(bouwstapels[dichtste_bij])
     verschil = stok[0] - bovenste + 1
+
+    if verschil < 0:
+        verschil += 11
 
     temp_hand = hand.copy()
     temp_weggooistapels = weggooistapels.copy()
@@ -180,20 +184,20 @@ def run():
         while True:
             bouwstapels, trekstapel = check_bouwstapels(bouwstapels, trekstapel)
 
-            if not hand:
+            if len(hand) == 0:
                 hand, trekstapel = trek_kaarten(hand, trekstapel)
 
             dichtste_bij = dichtste_bij_stok(bouwstapels, stok, hand, weggooistapels)
             pad = pad_maken(bouwstapels, stok, hand, weggooistapels)
 
-            print("\nStok: {}\nBouwstapels: {}\nHand: {}\nWeggooistapels: {}\n\nBouwstapel {} is het dichtste bij de stok\nPad: {}\n".format(stok[0], bouwstapels, hand, weggooistapels, dichtste_bij, pad))
+            print("\nStok: {}   ({})\nBouwstapels: {}\nHand: {}\nWeggooistapels: {}\n\nBouwstapel {} is het dichtste bij de stok\nPad: {}\n".format(stok[0], len(stok), bouwstapels, hand, weggooistapels, dichtste_bij, pad))
 
             if not pad:
                 break
 
             bouwstapels[dichtste_bij], stok, hand, weggooistapels = pad_toepassen(pad, bouwstapels[dichtste_bij], stok, hand, weggooistapels)
 
-            print("Na toepassen van pad:\n\nStok: {}\nBouwstapels: {}\nHand: {}\nWeggooistapels: {}".format(stok[0], bouwstapels, hand, weggooistapels))
+            print("Na toepassen van pad:\n\nStok: {}   ({})\nBouwstapels: {}\nHand: {}\nWeggooistapels: {}".format(stok[0], len(stok), bouwstapels, hand, weggooistapels))
 
         hand, weggooistapels = kaart_wegleggen(hand, weggooistapels)
 
