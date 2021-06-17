@@ -17,11 +17,17 @@ def stapels_aanmaken(window, speler, start, stop, step):
         window.columnconfigure(stapel, weight=1, minsize=75)
 
         if speler == 2 and stapel == 6:
-            image = ImageTk.PhotoImage(Image.open("Trekstapel.png"))
+            image = ImageTk.PhotoImage(Image.open("Images/Trekstapel.png"))
 
             label = tk.Label(window, image=image, background="#d6e0f5")
             label.image = image
             label.grid(row=speler, column=stapel)
+        elif speler != 2 and (7 - stapel if (speler != 3) else stapel) == 1:
+            image = ImageTk.PhotoImage(Image.open("Images/1/1.png"))
+
+            label = tk.Label(window, image=image, background="#d6e0f5")
+            label.image = image
+            label.grid(row=speler, column=stapel, pady=40, sticky="n" if (speler == 1) else (None if (speler == 2) else "s"))
         else:
             frame = tk.Frame(
                 master=window,
