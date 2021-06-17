@@ -1,20 +1,20 @@
-from tkinter import *
+import tkinter as tk
 
-def toon_beginscherm():
-    beginscherm.pack()
+window = tk.Tk()
 
-root = Tk(className=' Skip-Bo')
+for speler in range(1, 3):
+    window.rowconfigure(speler, weight=1, minsize=50)
 
-#Opties
-beginscherm = Frame(master=root)
-beginscherm.configure(bg='red')
-beginscherm.pack(fill="both", expand=True)
-beginscherm_tekst = Label(master=beginscherm,
-                         text='Skip-Bo',
-                         background='red',
-                         foreground='white',
-                         font=('Helvetica', 100, 'bold'))
-beginscherm_tekst.pack(padx=10, pady=10)
+    for stapel in range(1, 5):
+        window.columnconfigure(stapel, weight=1, minsize=75)
+        frame = tk.Frame(
+            master=window,
+            relief=tk.RAISED,
+            borderwidth=1
+        )
+        frame.grid(row=speler, column=stapel, padx=5, pady=5, ipadx=40, ipady=80, sticky="n" if (speler == 1) else "s")
 
-toon_beginscherm()
-root.mainloop()
+        label = tk.Label(master=frame, text=f"Speler {speler}\nStapel {stapel}")
+        label.pack(padx=5, pady=5)
+
+window.mainloop()
