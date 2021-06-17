@@ -27,9 +27,9 @@ def stapels_aanmaken(window, speler, bovenste_kaart_stok, aantal_kaarten_stok, a
             label.image = image
             label.grid(row=speler, column=stapel, padx=100)
         elif speler != 2 and temp_stapel == 1:
-            image = ImageTk.PhotoImage(Image.open(
-                "Images/{}/{} ({}).png".format(bovenste_kaart_stok, bovenste_kaart_stok,
-                                               5 if (aantal_kaarten_stok > 5) else aantal_kaarten_stok)))
+            Image.open("Images/{}/{} ({}).png".format(bovenste_kaart_stok, bovenste_kaart_stok,
+                                                      5 if (aantal_kaarten_stok > 5) else aantal_kaarten_stok))
+            image = ImageTk.PhotoImage(image.rotate(180 if (speler == 1) else 0))
 
             label = tk.Label(window, image=image, background="#d6e0f5")
             label.image = image
@@ -47,4 +47,4 @@ def stapels_aanmaken(window, speler, bovenste_kaart_stok, aantal_kaarten_stok, a
             label = tk.Label(master=frame, text="Speler {}\nStapel {}".format(speler, temp_stapel))
             label.pack(padx=5, pady=5)
 
-run(tk.Tk(className=' Skip-Bo'), 1, 30, 0)
+run(tk.Tk(className=' Skip-Bo'), 1, 1, 0)
