@@ -14,32 +14,39 @@ def open_image(window, bestand, rotate, setting, row, column, padx, pady, sticky
     elif setting == "place":
         label.place(x=70 * row if (column == 1) else 1320 + 73 * row, y=40 if (column == 1) else 780)
 
-def stapels_maken(window, speler, bouwstapels, weggooistapels, stok):
-    for stapel in range(1, 9):
-        window.columnconfigure(stapel, weight=1, minsize=75)
+def stapels_maken(window, speler, stapels, stok):
+    for column in range(1, 9):
+        window.columnconfigure(column, weight=1, minsize=75)
 
-        temp_stapel = 9 - stapel if (speler != 3) else stapel
+        temp_column = 9 - column if (speler != 3) else column
 
-        if temp_stapel == 1 or temp_stapel == 7 or temp_stapel == 8:
+        if temp_column == 1 or temp_column == 7 or temp_column == 8:
             frame = tk.Frame(master=window, relief=tk.RAISED, background="#d6e0f5")
-            frame.grid(row=speler, column=stapel, padx=5, pady=40, ipadx=82.5, ipady=118.5,
+            frame.grid(row=speler, column=column, padx=5, pady=40, ipadx=82.5, ipady=118.5,
                        sticky="n" if (speler == 1) else (None if (speler == 2) else "s"))
 
-            if speler != 2 and temp_stapel == 1:
+            if speler != 2 and temp_column == 1:
                 label = tk.Label(master=window, text=len(stok), background="#d6e0f5",
                                  font=('Helvetica', 50, 'bold'))
                 label.place(x=1640 if (speler == 1) else 200, y=125 if (speler == 1) else 845)
             continue
 
-        if speler == 2 and stapel == 7:
-            open_image(window, "Images/Trekstapel.png", False, "grid", speler, stapel, 100, None, None)
-        elif speler != 2 and temp_stapel == 2:
+        # Trekstapel
+        if speler == 2 and column == 7:
+            open_image(window, "Images/Trekstapel.png", False, "grid", speler, column, 100, None, None)
+        # Stok
+        elif speler != 2 and temp_column == 2:
             open_image(window, "Images/{}/{} ({}).png".format(stok[0], stok[0], 5 if (len(stok) > 5) else len(stok)),
-                       True if (speler == 1) else False, "grid", speler, stapel, 100, 40,
+                       True if (speler == 1) else False, "grid", speler, column, 100, 40,
                        "n" if (speler == 1) else (None if (speler == 2) else "s"))
+        # Bouw en weggooistapels
         else:
-            open_image(window, "Images/{}/{} ({}).png".format(stapel, stapel, 1), True if (speler == 1) else False,
-                       "grid", speler, stapel, 5, 40, "n" if (speler == 1) else (None if (speler == 2) else "s"))
+            keys = ['A', 'B', 'C', 'D']
+            stapel = stapels[keys[6 - (9 - column if (speler != 1) else column)]]
+            open_image(window, "Images/{}".format(
+                "Lege stapel.png" if (len(stapel) == 0) else "{}/{} ({}).png".format(stapel[-1], stapel[-1], 1)),
+                       True if (speler == 1) else False, "grid", speler, column, 5, 40,
+                       "n" if (speler == 1) else (None if (speler == 2) else "s"))
 
 def hand_maken(window, speler, hand):
     for kaart in range(1, len(hand) + 1):
@@ -56,25 +63,28 @@ def instellen():
     trekstapel += ["SB"] * 18
     shuffle(trekstapel)
 
-    bouwstapels = {'A': [], 'B': [], 'C': [], 'D': []}
-    weggooistapels = {'A': [], 'B': [], 'C': [], 'D': []}
+    bouwstapels = {'A': [1, 2, 3], 'B': [1, 2, 3, 4, 5, 6], 'C': [1, 2, 3, 4, 5, 7, 8, 9], 'D': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]}
+    mens_weggooistapels = {'A': [9], 'B': [10], 'C': [11], 'D': [12]}
+    comp_weggooistapels = {'A': [1], 'B': [2], 'C': [3], 'D': [4]}
 
     mens_stok, trekstapel = kaart_van_trekstapel(trekstapel, 30)
     comp_stok, trekstapel = kaart_van_trekstapel(trekstapel, 30)
     mens_hand, trekstapel = kaart_van_trekstapel(trekstapel, 5)
 
-    return trekstapel, bouwstapels, weggooistapels, mens_stok, comp_stok, mens_hand
+    return trekstapel, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand
 
 # Main functie
 def run(window):
     window.configure(background="#d6e0f5")
 
-    trekstapel, bouwstapels, weggooistapels, mens_stok, comp_stok, mens_hand = instellen()
+    trekstapel, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand = instellen()
 
     for speler in range(1, 4):
         window.rowconfigure(speler, weight=1, minsize=50)
 
-        stapels_maken(window, speler, bouwstapels, weggooistapels, comp_stok if (speler == 1) else mens_stok)
+        stapels_maken(window, speler,
+                      comp_weggooistapels if (speler == 1) else (bouwstapels if (speler == 2) else mens_weggooistapels),
+                      comp_stok if (speler == 1) else mens_stok)
 
         if speler != 2:
             hand_maken(window, speler, mens_hand)
