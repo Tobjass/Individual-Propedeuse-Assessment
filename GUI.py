@@ -44,7 +44,9 @@ def stapels_maken(window, speler, stapels, stok):
             keys = ['A', 'B', 'C', 'D']
             stapel = stapels[keys[6 - (9 - column if (speler != 1) else column)]]
             open_image(window, "Images/{}".format(
-                "Lege stapel.png" if (len(stapel) == 0) else "{}/{} ({}).png".format(stapel[-1], stapel[-1], 1)),
+                "Lege stapel.png" if (len(stapel) == 0) else "{}/{} ({}).png".format(stapel[-1], stapel[-1],
+                                                                                     5 if (len(stapel) > 5) else len(
+                                                                                         stapel))),
                        True if (speler == 1) else False, "grid", speler, column, 5, 40,
                        "n" if (speler == 1) else (None if (speler == 2) else "s"))
 
@@ -64,8 +66,8 @@ def instellen():
     shuffle(trekstapel)
 
     bouwstapels = {'A': [1, 2, 3], 'B': [1, 2, 3, 4, 5, 6], 'C': [1, 2, 3, 4, 5, 7, 8, 9], 'D': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]}
-    mens_weggooistapels = {'A': [9], 'B': [10], 'C': [11], 'D': [12]}
-    comp_weggooistapels = {'A': [1], 'B': [2], 'C': [3], 'D': [4]}
+    mens_weggooistapels = {'A': [9, 9], 'B': [10], 'C': [11, 11, 11], 'D': [12]}
+    comp_weggooistapels = {'A': [1, 1], 'B': [2], 'C': [3, 3], 'D': [4]}
 
     mens_stok, trekstapel = kaart_van_trekstapel(trekstapel, 30)
     comp_stok, trekstapel = kaart_van_trekstapel(trekstapel, 30)
