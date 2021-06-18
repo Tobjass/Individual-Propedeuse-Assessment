@@ -36,6 +36,10 @@ def stapels_aanmaken(window, speler, bovenste_kaart_stok, aantal_kaarten_stok, a
             )
             frame.grid(row=speler, column=stapel, padx=5, pady=40, ipadx=82.5, ipady=118.5,
                        sticky="n" if (speler == 1) else (None if (speler == 2) else "s"))
+
+            if speler != 2 and temp_stapel == 1:
+                label = tk.Label(master=window, text=aantal_kaarten_stok, background="#d6e0f5", font=('Helvetica', 50, 'bold'))
+                label.place(x=1640 if (speler == 1) else 200, y=125 if (speler == 1) else 845)
             continue
 
         if speler == 2 and stapel == 7:
