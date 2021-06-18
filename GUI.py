@@ -11,6 +11,14 @@ def run(window, bovenste_kaart_stok, aantal_kaarten_stok, aantal_kaarten_hand):
 
     window.mainloop()
 
+def open_image(window, bestand, rotate, row, column, padx, pady, sticky):
+    image = Image.open(bestand)
+    image = ImageTk.PhotoImage(image.rotate(180 if (rotate) else 0))
+
+    label = tk.Label(window, image=image, background="#d6e0f5")
+    label.image = image
+    label.grid(row=row, column=column, padx=padx, pady=pady, sticky=sticky)
+
 def stapels_aanmaken(window, speler, bovenste_kaart_stok, aantal_kaarten_stok, aantal_kaarten_hand, start, stop, step):
     for stapel in range(start, stop, step):
         window.columnconfigure(stapel, weight=1, minsize=75)
@@ -28,27 +36,14 @@ def stapels_aanmaken(window, speler, bovenste_kaart_stok, aantal_kaarten_stok, a
             continue
 
         if speler == 2 and stapel == 7:
-            image = ImageTk.PhotoImage(Image.open("Images/Trekstapel.png"))
-
-            label = tk.Label(window, image=image, background="#d6e0f5")
-            label.image = image
-            label.grid(row=speler, column=stapel, padx=100)
+            open_image(window, "Images/Trekstapel.png", False, speler, stapel, 100, None, None)
         elif speler != 2 and temp_stapel == 2:
-            image = Image.open("Images/{}/{} ({}).png".format(bovenste_kaart_stok, bovenste_kaart_stok,
-                                                      5 if (aantal_kaarten_stok > 5) else aantal_kaarten_stok))
-            image = ImageTk.PhotoImage(image.rotate(180 if (speler == 1) else 0))
-
-            label = tk.Label(window, image=image, background="#d6e0f5")
-            label.image = image
-            label.grid(row=speler, column=stapel, padx=100, pady=40,
-                       sticky="n" if (speler == 1) else (None if (speler == 2) else "s"))
+            open_image(window, "Images/{}/{} ({}).png".format(bovenste_kaart_stok, bovenste_kaart_stok,
+                                                              5 if (aantal_kaarten_stok > 5) else aantal_kaarten_stok),
+                       True if (speler == 1) else False, speler, stapel, 100, 40,
+                       "n" if (speler == 1) else (None if (speler == 2) else "s"))
         else:
-            image = Image.open("Images/{}/{} ({}).png".format(1, 1, 1))
-            image = ImageTk.PhotoImage(image.rotate(180 if (speler == 1) else 0))
+            open_image(window, "Images/{}/{} ({}).png".format(stapel, stapel, 1), True if (speler == 1) else False,
+                       speler, stapel, 5, 40, "n" if (speler == 1) else (None if (speler == 2) else "s"))
 
-            label = tk.Label(window, image=image, background="#d6e0f5")
-            label.image = image
-            label.grid(row=speler, column=stapel, padx=5, pady=40,
-                       sticky="n" if (speler == 1) else (None if (speler == 2) else "s"))
-
-run(tk.Tk(className=' Skip-Bo'), 6, 30, 0)
+run(tk.Tk(className=' Skip-Bo'), 11, 30, 0)
