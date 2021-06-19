@@ -4,13 +4,24 @@ from random import shuffle
 import pyautogui
 
 # Grafical User Interface
-def check_widget(x, y):
+def check_widget(hand_x, stapel_x, stapel_y):
+    hand_posities = [[1357, 1448, 1539, 1630, 1721], [1403, 1494, 1585, 1676], [1448, 1539, 1630], [1494, 1585], [1539]]
+
+    for positie in range(5):
+        hand_index = None
+        for kaart_pos in hand_posities[positie]:
+            if kaart_pos == hand_x:
+                hand_index = hand_posities[positie].index(hand_x)
+                break
+        if hand_index is not None:
+            break
+
     posities = [[590, 750, 422, 658], [780, 944, 422, 658], [975, 1137, 422, 658], [1165, 1331, 422, 658],
                 [589, 749, 799, 1039], [780, 943, 799, 1039], [972, 1137, 799, 1039], [1165, 1330, 799, 1039]]
 
     for stapel in posities:
-        if stapel[0] <= x <= stapel[1] and stapel[2] <= y <= stapel[3]:
-            return posities.index(stapel)
+        if stapel[0] <= stapel_x <= stapel[1] and stapel[2] <= stapel_y <= stapel[3]:
+            return hand_index, posities.index(stapel)
 
 def drag(widget):
     widget.bind("<ButtonRelease-1>", on_drop)
@@ -23,10 +34,11 @@ def on_drop(event):
     x, y = pyautogui.position()
     print("\n{}, {}\t{}, {}".format(event.widget.winfo_x(), event.widget.winfo_y(), x, y))
 
-    stapel = check_widget(x, y)
+    hand_index, stapel = check_widget(event.widget.winfo_x(), x, y)
     keys = ['A', 'B', 'C', 'D']
     print("{}".format("Bouwstapel {}".format(keys[stapel]) if (stapel <= 3) else (
         "Weggooistapel {}".format(keys[stapel - 4]) if (4 <= stapel <= 7) else None)))
+    print("Hand_index: {}".format(hand_index))
 
     try:
         target.configure(image=event.widget.cget("image"))
