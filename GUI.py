@@ -31,17 +31,16 @@ def on_drop(event):
     x, y = event.widget.winfo_pointerxy()
     target = event.widget.winfo_containing(x, y)
 
-    x, y = pyautogui.position()
-    print("\n{}, {}\t{}, {}".format(event.widget.winfo_x(), event.widget.winfo_y(), x, y))
-
-    hand_index, stapel = check_widget(event.widget.winfo_x(), x, y)
-    keys = ['A', 'B', 'C', 'D']
-    print("{}".format("Bouwstapel {}".format(keys[stapel]) if (stapel <= 3) else (
-        "Weggooistapel {}".format(keys[stapel - 4]) if (4 <= stapel <= 7) else None)))
-    print("Hand_index: {}".format(hand_index))
-
     try:
+        x, y = pyautogui.position()
+        hand_index, stapel = check_widget(event.widget.winfo_x(), x, y)
+        keys = ['A', 'B', 'C', 'D']
+        stapel = ["Bouwstapel", keys[stapel]] if (stapel <= 3) else (
+            ["Weggooistapel", keys[stapel - 4]] if (4 <= stapel <= 7) else None)
+
         target.configure(image=event.widget.cget("image"))
+
+        return hand_index, stapel
     except:
         pass
 
