@@ -22,16 +22,15 @@ def open_image(window, bestand, rotate, setting, row, column, padx, pady, sticky
     if setting == "grid":
         label.grid(row=row, column=column, padx=padx, pady=pady, sticky=sticky)
     elif setting == "place":
-        label.place(x=70 * row if (column == 1) else 1320 + 73 * row, y=40 if (column == 1) else 780)
+        print("{} x {}".format(window.winfo_screenwidth(), window.winfo_screenheight()))
+        label.place(x=-63 + 45.5 * (5 - padx) + 91 * row if (column == 1) else 1266 + 45.5 * (5 - padx) + 91 * row, y=40 if (column == 1) else 801)
     return label
 
 def stapels_maken(window, speler, bouwstapels, stapels, stok):
-    print()
     for column in range(1, 9):
         window.columnconfigure(column, weight=1, minsize=75)
 
         temp_column = 9 - column if (speler != 3) else column
-        print(column, temp_column)
 
         if temp_column in [1, 7, 8]:
             frame = tk.Frame(master=window, relief=tk.RAISED, background="#d6e0f5")
@@ -63,16 +62,28 @@ def stapels_maken(window, speler, bouwstapels, stapels, stok):
                                                                                          stapel))),
                                True if (speler == 1) else False, "grid", speler, column, 5, 40,
                                "n" if (speler == 1) else (None if (speler == 2) else "s"))
-            if speler == 3 and mogelijkheid(stapel[-1], bouwstapels):
+            if speler == 3 and (len(stapel) > 0 and mogelijkheid(stapel[-1], bouwstapels)):
                 hover(label, "red", "#d6e0f5")
 
 def hand_maken(window, speler, hand):
     for kaart in range(1, len(hand) + 1):
         label = open_image(window, "Images/{}".format(
             "Omgedraaide kaart.png" if (speler == 1) else "{}/{} ({}).png".format(hand[kaart - 1], hand[kaart - 1], 1)),
-                   True if (speler == 1) else False, "place", kaart, speler, None, None, None)
+                   True if (speler == 1) else False, "place", kaart, speler, len(hand), None, None)
         if speler == 3:
             hover(label, "red", "#d6e0f5")
+
+def update_gui(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand):
+    window.attributes('-fullscreen', True)
+    for speler in range(1, 4):
+        window.rowconfigure(speler, weight=1, minsize=50)
+
+        stapels_maken(window, speler, bouwstapels,
+                      comp_weggooistapels if (speler == 1) else (bouwstapels if (speler == 2) else mens_weggooistapels),
+                      comp_stok if (speler == 1) else mens_stok)
+
+        if (speler == 1 and len(comp_hand) > 0) or (speler == 3 and len(mens_hand) > 0):
+            hand_maken(window, speler, comp_hand if (speler == 1) else mens_hand)
 
 # Overige functies
 def kaart_van_trekstapel(trekstapel, aantal):
@@ -83,18 +94,15 @@ def instellen():
     trekstapel += ["SB"] * 18
     shuffle(trekstapel)
 
-    lijst = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, "SB"]
-    shuffle(lijst)
-
-    bouwstapels = {'A': [1, 2, 3], 'B': [1, 2, 3, 4, 5, "SB"], 'C': [1, 2, 3, 4, 5, 7, 8, 9], 'D': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]}
-    mens_weggooistapels = {'A': [lijst[0]], 'B': [lijst[1]], 'C': [lijst[2]], 'D': [lijst[3]]}
-    comp_weggooistapels = {'A': [1, 1], 'B': [2], 'C': [3, 3], 'D': [4]}
+    bouwstapels = {'A': [],  'B': [], 'C': [], 'D': []}
+    mens_weggooistapels = {'A': [], 'B': [], 'C': [], 'D': []}
+    comp_weggooistapels = {'A': [], 'B': [], 'C': [], 'D': []}
 
     mens_stok, trekstapel = kaart_van_trekstapel(trekstapel, 30)
     comp_stok, trekstapel = kaart_van_trekstapel(trekstapel, 30)
     mens_hand, trekstapel = kaart_van_trekstapel(trekstapel, 5)
 
-    return trekstapel, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand
+    return trekstapel, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, []
 
 def bovenste_kaart_bouwstapel(bouwstapel):
     if not bouwstapel:
@@ -110,17 +118,9 @@ def bovenste_kaart_bouwstapel(bouwstapel):
 def run(window):
     window.configure(background="#d6e0f5")
 
-    trekstapel, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand = instellen()
+    trekstapel, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand = instellen()
 
-    for speler in range(1, 4):
-        window.rowconfigure(speler, weight=1, minsize=50)
-
-        stapels_maken(window, speler, bouwstapels,
-                      comp_weggooistapels if (speler == 1) else (bouwstapels if (speler == 2) else mens_weggooistapels),
-                      comp_stok if (speler == 1) else mens_stok)
-
-        if speler != 2:
-            hand_maken(window, speler, mens_hand)
+    update_gui(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand)
 
     window.mainloop()
 
