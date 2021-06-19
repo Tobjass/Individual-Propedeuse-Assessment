@@ -1,8 +1,21 @@
 import tkinter as tk
 from PIL import ImageTk, Image
 from random import shuffle
+import pyautogui
 
 # Grafical User Interface
+def drag(widget):
+    widget.bind("<ButtonRelease-1>", on_drop)
+    widget.configure(cursor="hand2")
+
+def on_drop(event):
+    x, y = event.widget.winfo_pointerxy()
+    target = event.widget.winfo_containing(x, y)
+    try:
+        target.configure(image=event.widget.cget("image"))
+    except:
+        pass
+
 def mogelijkheid(kaart, bouwstapels):
     for stapel in bouwstapels:
         if bovenste_kaart_bouwstapel(bouwstapels[stapel]) + 1 == kaart or kaart == "SB":
@@ -22,7 +35,6 @@ def open_image(window, bestand, rotate, setting, row, column, padx, pady, sticky
     if setting == "grid":
         label.grid(row=row, column=column, padx=padx, pady=pady, sticky=sticky)
     elif setting == "place":
-        print("{} x {}".format(window.winfo_screenwidth(), window.winfo_screenheight()))
         label.place(x=-63 + 45.5 * (5 - padx) + 91 * row if (column == 1) else 1266 + 45.5 * (5 - padx) + 91 * row, y=40 if (column == 1) else 801)
     return label
 
@@ -72,6 +84,7 @@ def hand_maken(window, speler, hand):
                    True if (speler == 1) else False, "place", kaart, speler, len(hand), None, None)
         if speler == 3:
             hover(label, "red", "#d6e0f5")
+            drag(label)
 
 def update_gui(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand):
     window.attributes('-fullscreen', True)
