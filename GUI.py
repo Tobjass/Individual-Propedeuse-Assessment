@@ -4,6 +4,14 @@ from random import shuffle
 import pyautogui
 
 # Grafical User Interface
+def check_widget(x, y):
+    posities = [[590, 750, 422, 658], [780, 944, 422, 658], [975, 1137, 422, 658], [1165, 1331, 422, 658],
+                [589, 749, 799, 1039], [780, 943, 799, 1039], [972, 1137, 799, 1039], [1165, 1330, 799, 1039]]
+
+    for stapel in posities:
+        if stapel[0] <= x <= stapel[1] and stapel[2] <= y <= stapel[3]:
+            return posities.index(stapel)
+
 def drag(widget):
     widget.bind("<ButtonRelease-1>", on_drop)
     widget.configure(cursor="hand2")
@@ -11,6 +19,15 @@ def drag(widget):
 def on_drop(event):
     x, y = event.widget.winfo_pointerxy()
     target = event.widget.winfo_containing(x, y)
+
+    x, y = pyautogui.position()
+    print("\n{}, {}\t{}, {}".format(event.widget.winfo_x(), event.widget.winfo_y(), x, y))
+
+    stapel = check_widget(x, y)
+    keys = ['A', 'B', 'C', 'D']
+    print("{}".format("Bouwstapel {}".format(keys[stapel]) if (stapel <= 3) else (
+        "Weggooistapel {}".format(keys[stapel - 4]) if (4 <= stapel <= 7) else None)))
+
     try:
         target.configure(image=event.widget.cget("image"))
     except:
