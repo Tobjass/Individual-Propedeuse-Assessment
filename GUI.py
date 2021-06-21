@@ -5,7 +5,9 @@ from pyautogui import position
 
 # Grafical User Interface
 def check_widget(hand, x, stapel_x, stapel_y):
-    weggooistapel_posities = [586, 779, 971, 1163]
+    print(x)
+
+    weggooistapel_posities = [586, 779, 971, 972, 1163]
     if x == 298:
         index = 5
     elif x in weggooistapel_posities:
@@ -21,6 +23,7 @@ def check_widget(hand, x, stapel_x, stapel_y):
     for stapel in stapelposities:
         if stapel[0] <= stapel_x <= stapel[1] and stapel[2] <= stapel_y <= stapel[3]:
             return index, stapelposities.index(stapel)
+    return -1, -1
 
 def drag(widget, window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand, trekstapel):
     widget.bind("<ButtonRelease-1>",
@@ -32,43 +35,43 @@ def on_drop(event, window, bouwstapels, mens_weggooistapels, comp_weggooistapels
     x, y = event.widget.winfo_pointerxy()
     target = event.widget.winfo_containing(x, y)
 
-    try:
-        target.configure(image=event.widget.cget("image"))
+    # try:
+    target.configure(image=event.widget.cget("image"))
 
-        x, y = position()
-        index, stapel = check_widget(mens_hand, event.widget.winfo_x(), x, y)
+    x, y = position()
+    index, stapel = check_widget(mens_hand, event.widget.winfo_x(), x, y)
 
-        keys = ['A', 'B', 'C', 'D']
-        mens_beurt = True
+    keys = ['A', 'B', 'C', 'D']
+    mens_beurt = True
 
-        if index == 5:
-            if bovenste_kaart_bouwstapel(bouwstapels[keys[stapel]]) + 1 == mens_stok[0] or mens_stok[0] == "SB":
-                print("Kaart {} uit de stok naar bouwstapel {}".format(mens_stok[0], keys[stapel]))
-                bouwstapels[keys[stapel]].append(mens_stok[0])
-                mens_stok = mens_stok[1:]
-        elif index >= 6:
-            if bovenste_kaart_bouwstapel(bouwstapels[keys[stapel]]) + 1 == mens_weggooistapels[keys[index - 6]][-1] or \
-                    mens_weggooistapels[keys[index - 6]][-1] == "SB":
-                print("Kaart {} uit weggooistapel {} naar bouwstapel {}".format(mens_weggooistapels[keys[index - 6]][-1],
-                                                                                keys[index - 6], keys[stapel]))
-                bouwstapels[keys[stapel]].append(mens_weggooistapels[keys[index - 6]][-1])
-                mens_weggooistapels[keys[index - 6]] = mens_weggooistapels[keys[index - 6]][:-1]
-        elif stapel <= 3 and index < 5:
-            if bovenste_kaart_bouwstapel(bouwstapels[keys[stapel]]) + 1 == mens_hand[index] or mens_hand[index] == "SB":
-                print("Kaart {} uit de hand naar bouwstapel {}".format(mens_hand[index], keys[stapel]))
-                bouwstapels[keys[stapel]].append(mens_hand[index])
-                mens_hand = mens_hand[:index] + mens_hand[index + 1:]
-        elif 4 <= stapel <= 7 and index < 5:
-            mens_beurt = False
-            print("Kaart {} uit de hand naar weggooistapel {}".format(mens_hand[index], keys[stapel - 4]))
-            mens_weggooistapels[keys[stapel - 4]].append(mens_hand[index])
+    if index == 5:
+        if bovenste_kaart_bouwstapel(bouwstapels[keys[stapel]]) + 1 == mens_stok[0] or mens_stok[0] == "SB":
+            print("Kaart {} uit de stok naar bouwstapel {}".format(mens_stok[0], keys[stapel]))
+            bouwstapels[keys[stapel]].append(mens_stok[0])
+            mens_stok = mens_stok[1:]
+    elif index >= 6:
+        if bovenste_kaart_bouwstapel(bouwstapels[keys[stapel]]) + 1 == mens_weggooistapels[keys[index - 6]][-1] or \
+                mens_weggooistapels[keys[index - 6]][-1] == "SB":
+            print("Kaart {} uit weggooistapel {} naar bouwstapel {}".format(mens_weggooistapels[keys[index - 6]][-1],
+                                                                            keys[index - 6], keys[stapel]))
+            bouwstapels[keys[stapel]].append(mens_weggooistapels[keys[index - 6]][-1])
+            mens_weggooistapels[keys[index - 6]] = mens_weggooistapels[keys[index - 6]][:-1]
+    elif stapel <= 3 and index < 5:
+        if bovenste_kaart_bouwstapel(bouwstapels[keys[stapel]]) + 1 == mens_hand[index] or mens_hand[index] == "SB":
+            print("Kaart {} uit de hand naar bouwstapel {}".format(mens_hand[index], keys[stapel]))
+            bouwstapels[keys[stapel]].append(mens_hand[index])
             mens_hand = mens_hand[:index] + mens_hand[index + 1:]
+    elif 4 <= stapel <= 7 and index < 5:
+        mens_beurt = False
+        print("Kaart {} uit de hand naar weggooistapel {}".format(mens_hand[index], keys[stapel - 4]))
+        mens_weggooistapels[keys[stapel - 4]].append(mens_hand[index])
+        mens_hand = mens_hand[:index] + mens_hand[index + 1:]
 
-        window.destroy()
-        window = tk.Tk(className=' Skip-Bo')
-        update_gui(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand, mens_beurt, trekstapel)
-    except:
-        pass
+    window.destroy()
+    window = tk.Tk(className=' Skip-Bo')
+    update_gui(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand, mens_beurt, trekstapel)
+    # except:
+    #     pass
 
 def hover(label, on_hover, on_leave):
     label.bind("<Enter>", func=lambda x: label.config(background=on_hover))
