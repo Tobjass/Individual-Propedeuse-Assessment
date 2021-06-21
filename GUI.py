@@ -164,6 +164,9 @@ def update_gui(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, me
         if (speler == 1 and len(comp_hand) > 0) or (speler == 3 and len(mens_hand) > 0):
             hand_maken(window, speler, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand, mens_beurt, trekstapel)
 
+    if mens_beurt is False:
+        run_algoritme(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand, mens_beurt, trekstapel)
+
 # Overige functies
 def kaart_van_trekstapel(trekstapel, aantal):
     return trekstapel[:aantal], trekstapel[aantal:]
@@ -173,7 +176,7 @@ def instellen():
     trekstapel += ["SB"] * 18
     shuffle(trekstapel)
 
-    bouwstapels = {'A': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],  'B': [], 'C': [], 'D': []}
+    bouwstapels = {'A': [],  'B': [], 'C': [], 'D': []}
     mens_weggooistapels = {'A': [], 'B': [], 'C': [], 'D': []}
     comp_weggooistapels = {'A': [], 'B': [], 'C': [], 'D': []}
 
@@ -211,6 +214,174 @@ def check_bouwstapels(window, bouwstapels, mens_weggooistapels, comp_weggooistap
             bouwstapels[stapel] = []
 
             update_gui(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand, mens_beurt, trekstapel)
+
+# Algoritme
+def run_algoritme(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand, mens_beurt, trekstapel):
+    comp_hand, trekstapel = trek_kaarten(comp_hand, trekstapel)
+
+    while True:
+        if len(comp_hand) == 0:
+            comp_hand, trekstapel = trek_kaarten(comp_hand, trekstapel)
+
+        dichtste_bij = dichtste_bij_stok(bouwstapels, comp_stok, comp_hand, comp_weggooistapels)
+        pad = pad_maken(bouwstapels, comp_stok, comp_hand, comp_weggooistapels)
+
+        print(
+            "\nStok: {}   ({})\nBouwstapels: {}\nHand: {}\nWeggooistapels: {}\n\nBouwstapel {} is het dichtste bij de stok\nPad: {}\n".format(
+                comp_stok[0], len(comp_stok), bouwstapels, comp_hand, comp_weggooistapels, dichtste_bij, pad))
+
+        if not pad:
+            break
+
+        bouwstapels[dichtste_bij], comp_stok, comp_hand, comp_weggooistapels = pad_toepassen(pad,
+                                                                                             bouwstapels[dichtste_bij],
+                                                                                             comp_stok, comp_hand,
+                                                                                             comp_weggooistapels)
+
+        print("Na toepassen van pad:\n\nStok: {}   ({})\nBouwstapels: {}\nHand: {}\nWeggooistapels: {}".format(
+            comp_stok[0], len(comp_stok), bouwstapels, comp_hand, comp_weggooistapels))
+
+    comp_hand, comp_weggooistapels = kaart_wegleggen(comp_hand, comp_weggooistapels)
+
+    mens_hand, trekstapel = trek_kaarten(mens_hand, trekstapel)
+
+    update_gui(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand,
+               comp_hand, True, trekstapel)
+
+def kleinste_weggooistapel(weggooistapels):
+    if len(weggooistapels['A']) == len(weggooistapels['B']) and len(weggooistapels['B']) == len(weggooistapels['C']) and len(weggooistapels['C']) == len(weggooistapels['D']):
+        return 'A'
+    len_kleinste = 100
+    kleinste = None
+    for stapel in weggooistapels:
+        if len(weggooistapels[stapel]) < len_kleinste:
+            len_kleinste = len(weggooistapels[stapel])
+            kleinste = stapel
+    return kleinste
+
+def check_weggooistapel(stapel):
+    gelijk = stapel[-1]
+    for kaart in stapel:
+        if kaart != gelijk:
+            return False
+    return True
+
+def kaart_wegleggen(hand, weggooistapels):
+    index = None
+    for optie in range(4):
+        for stapel in weggooistapels:
+            if optie == 0 and (len(weggooistapels[stapel]) > 0 and (check_weggooistapel(weggooistapels[stapel]) and weggooistapels[stapel][-1] in hand)):
+                index = hand.index(weggooistapels[stapel][-1])
+                break
+            elif optie == 1 and len(weggooistapels[stapel]) == 0:
+                for handoptie in range(2):
+                    for kaart in hand:
+                        if (handoptie == 0 and (hand.count(kaart) > 1 and kaart != "SB")) or handoptie == 1 and kaart != "SB":
+                            index = hand.index(kaart)
+                            break
+                    if index is not None:
+                        break
+                break
+            elif optie == 2 and (len(weggooistapels[stapel]) > 0 and weggooistapels[stapel][-1] - 1 in hand):
+                index = hand.index(weggooistapels[stapel][-1] - 1)
+                break
+            elif optie == 3:
+                index = 0
+                for kaart in hand:
+                    if kaart != "SB":
+                        index = hand.index(kaart)
+                        break
+                print("Kaart {} wordt naar weggooistapel {} verplaatst\n\n".format(hand[index], kleinste_weggooistapel(weggooistapels)))
+                weggooistapels[kleinste_weggooistapel(weggooistapels)].append(hand[index])
+                hand = hand[:index] + hand[index + 1:]
+                return hand, weggooistapels
+        if index is not None:
+            break
+    print("Kaart {} wordt naar weggooistapel {} verplaatst\n\n".format(hand[index], stapel))
+    weggooistapels[stapel].append(hand[index])
+    hand = hand[:index] + hand[index + 1:]
+    return hand, weggooistapels
+
+def check_weggooistapels(weggooistapels, kaart):
+    for stapel in weggooistapels:
+        if not weggooistapels[stapel]:
+            continue
+        if weggooistapels[stapel][-1] == kaart:
+            return True, stapel
+    return False, None
+
+def beschikbare_kaarten(hand, weggooistapels):
+    temp = hand.copy()
+    for stapel in weggooistapels:
+        if len(weggooistapels[stapel]) > 0:
+            temp.append(weggooistapels[stapel][-1])
+    return temp
+
+def dichtste_bij_stok(bouwstapels, stok, hand, weggooistapels):
+    if stok[0] == 'SB':
+        for stapel in bouwstapels:
+            if bovenste_kaart_bouwstapel(bouwstapels[stapel]) + 1 in beschikbare_kaarten(hand, weggooistapels):
+                continue
+            elif bovenste_kaart_bouwstapel(bouwstapels[stapel]) + 1 not in beschikbare_kaarten(hand, weggooistapels):
+                return stapel
+
+    kleinste_verschil = 13
+    for stapel in bouwstapels:
+        verschil = stok[0] - bovenste_kaart_bouwstapel(bouwstapels[stapel])
+        if verschil <= 0:
+            verschil += 12
+        if verschil < kleinste_verschil:
+            kleinste_verschil = verschil
+            meest_dichtbij = stapel
+    return meest_dichtbij
+
+def pad_maken(bouwstapels, stok, hand, weggooistapels):
+    if stok[0] == "SB":
+        return [["stok", 0]]
+
+    dichtste_bij = dichtste_bij_stok(bouwstapels, stok, hand, weggooistapels)
+    bovenste = bovenste_kaart_bouwstapel(bouwstapels[dichtste_bij])
+    verschil = stok[0] - bovenste + 1
+
+    if verschil < 0:
+        verschil += 11
+
+    temp_hand = hand.copy()
+    temp_weggooistapels = weggooistapels.copy()
+
+    pad = []
+    for kaart in range(1, verschil):
+        if bovenste + kaart == stok[0]:
+            pad.append(["stok", 0])
+            break
+        if bovenste + kaart in temp_hand:
+            pad.append(["hand", temp_hand.index(bovenste + kaart)])
+            temp_hand.remove(bovenste + kaart)
+            continue
+        weggooistapel = check_weggooistapels(temp_weggooistapels, bovenste + kaart)
+        if weggooistapel[0]:
+            pad.append(["weggooistapel", weggooistapel[1]])
+            temp_weggooistapels[weggooistapel[1]] = temp_weggooistapels[weggooistapel[1]][:-1]
+            continue
+        elif "SB" in temp_hand:
+            pad.append(["hand", temp_hand.index("SB")])
+            temp_hand.remove("SB")
+            continue
+        break
+    return pad
+
+def pad_toepassen(pad, bouwstapel, stok, hand, weggooistapels):
+    for stap in pad:
+        if stap[0] == "stok":
+            bouwstapel.append(stok[stap[1]])
+            stok = stok[1:]
+        elif stap[0] == "hand":
+            bouwstapel.append(hand[stap[1]])
+            hand = hand[:stap[1]] + hand[stap[1] + 1:]
+        elif stap[0] == "weggooistapel":
+            bouwstapel.append(weggooistapels[stap[1]][-1])
+            weggooistapels[stap[1]] = weggooistapels[stap[1]][:-1]
+    return bouwstapel, stok, hand, weggooistapels
 
 # Main functie
 def run(window):
