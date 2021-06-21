@@ -1,19 +1,15 @@
 import tkinter as tk
 from PIL import ImageTk, Image
 from random import shuffle
-import pyautogui
+from pyautogui import position
 
 # Grafical User Interface
-def check_widget(hand_x, stapel_x, stapel_y):
+def check_widget(hand, hand_x, stapel_x, stapel_y):
     hand_posities = [[1357, 1448, 1539, 1630, 1721], [1403, 1494, 1585, 1676], [1448, 1539, 1630], [1494, 1585], [1539]]
 
-    for positie in range(5):
-        hand_index = None
-        for kaart_pos in hand_posities[positie]:
-            if kaart_pos == hand_x:
-                hand_index = hand_posities[positie].index(hand_x)
-                break
-        if hand_index is not None:
+    for positie in hand_posities[5 - len(hand)]:
+        if positie == hand_x:
+            hand_index = hand_posities[5 - len(hand)].index(hand_x)
             break
 
     posities = [[590, 750, 422, 658], [780, 944, 422, 658], [975, 1137, 422, 658], [1165, 1331, 422, 658],
@@ -23,32 +19,39 @@ def check_widget(hand_x, stapel_x, stapel_y):
         if stapel[0] <= stapel_x <= stapel[1] and stapel[2] <= stapel_y <= stapel[3]:
             return hand_index, posities.index(stapel)
 
-def drag(widget):
-    widget.bind("<ButtonRelease-1>", on_drop)
+def drag(widget, window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand):
+    widget.bind("<ButtonRelease-1>",
+                lambda event: on_drop(event, window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok,
+                                      comp_stok, mens_hand, comp_hand))
     widget.configure(cursor="hand2")
 
-def on_drop(event):
+def on_drop(event, window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand):
     x, y = event.widget.winfo_pointerxy()
     target = event.widget.winfo_containing(x, y)
 
     try:
-        x, y = pyautogui.position()
-        hand_index, stapel = check_widget(event.widget.winfo_x(), x, y)
-        keys = ['A', 'B', 'C', 'D']
-        stapel = ["Bouwstapel", keys[stapel]] if (stapel <= 3) else (
-            ["Weggooistapel", keys[stapel - 4]] if (4 <= stapel <= 7) else None)
-
         target.configure(image=event.widget.cget("image"))
 
-        return hand_index, stapel
+        x, y = position()
+        hand_index, stapel = check_widget(mens_hand, event.widget.winfo_x(), x, y)
+
+        keys = ['A', 'B', 'C', 'D']
+        if stapel <= 3:
+            if bovenste_kaart_bouwstapel(bouwstapels[keys[stapel]]) + 1 == mens_hand[hand_index] or mens_hand[hand_index] == "SB":
+                print("Kaart {} uit de hand naar bouwstapel {}".format(mens_hand[hand_index], keys[stapel]))
+                bouwstapels[keys[stapel]].append(mens_hand[hand_index])
+                mens_hand = mens_hand[:hand_index] + mens_hand[hand_index + 1:]
+        elif 4 <= stapel <= 7:
+            print(f"{hand_index = }")
+            print("Kaart {} uit de hand naar weggooistapel {}".format(mens_hand[hand_index], keys[stapel - 4]))
+            mens_weggooistapels[keys[stapel - 4]].append(mens_hand[hand_index])
+            mens_hand = mens_hand[:hand_index] + mens_hand[hand_index + 1:]
+
+        window.destroy()
+        window = tk.Tk(className=' Skip-Bo')
+        update_gui(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand)
     except:
         pass
-
-def mogelijkheid(kaart, bouwstapels):
-    for stapel in bouwstapels:
-        if bovenste_kaart_bouwstapel(bouwstapels[stapel]) + 1 == kaart or kaart == "SB":
-            return True
-    return False
 
 def hover(label, on_hover, on_leave):
     label.bind("<Enter>", func=lambda x: label.config(background=on_hover))
@@ -65,6 +68,12 @@ def open_image(window, bestand, rotate, setting, row, column, padx, pady, sticky
     elif setting == "place":
         label.place(x=-63 + 45.5 * (5 - padx) + 91 * row if (column == 1) else 1266 + 45.5 * (5 - padx) + 91 * row, y=40 if (column == 1) else 801)
     return label
+
+def mogelijkheid(kaart, bouwstapels):
+    for stapel in bouwstapels:
+        if bovenste_kaart_bouwstapel(bouwstapels[stapel]) + 1 == kaart or kaart == "SB":
+            return True
+    return False
 
 def stapels_maken(window, speler, bouwstapels, stapels, stok):
     for column in range(1, 9):
@@ -105,17 +114,20 @@ def stapels_maken(window, speler, bouwstapels, stapels, stok):
             if speler == 3 and (len(stapel) > 0 and mogelijkheid(stapel[-1], bouwstapels)):
                 hover(label, "red", "#d6e0f5")
 
-def hand_maken(window, speler, hand):
+def hand_maken(window, speler, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand):
+    hand = comp_hand if (speler == 1) else mens_hand
     for kaart in range(1, len(hand) + 1):
         label = open_image(window, "Images/{}".format(
             "Omgedraaide kaart.png" if (speler == 1) else "{}/{} ({}).png".format(hand[kaart - 1], hand[kaart - 1], 1)),
                    True if (speler == 1) else False, "place", kaart, speler, len(hand), None, None)
         if speler == 3:
             hover(label, "red", "#d6e0f5")
-            drag(label)
+            drag(label, window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand)
 
 def update_gui(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand):
     window.attributes('-fullscreen', True)
+    window.configure(background="#d6e0f5")
+
     for speler in range(1, 4):
         window.rowconfigure(speler, weight=1, minsize=50)
 
@@ -124,7 +136,7 @@ def update_gui(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, me
                       comp_stok if (speler == 1) else mens_stok)
 
         if (speler == 1 and len(comp_hand) > 0) or (speler == 3 and len(mens_hand) > 0):
-            hand_maken(window, speler, comp_hand if (speler == 1) else mens_hand)
+            hand_maken(window, speler, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand)
 
 # Overige functies
 def kaart_van_trekstapel(trekstapel, aantal):
@@ -157,8 +169,6 @@ def bovenste_kaart_bouwstapel(bouwstapel):
 
 # Main functie
 def run(window):
-    window.configure(background="#d6e0f5")
-
     trekstapel, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand = instellen()
 
     update_gui(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand)
