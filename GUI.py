@@ -5,22 +5,22 @@ from pyautogui import position
 
 # Grafical User Interface
 def check_widget(hand, x, stapel_x, stapel_y):
+    weggooistapel_posities = [586, 779, 971, 1163]
     if x == 298:
-        hand_index = 5
+        index = 5
+    elif x in weggooistapel_posities:
+        index = 6 + weggooistapel_posities.index(x)
     else:
         hand_posities = [[1357, 1448, 1539, 1630, 1721], [1403, 1494, 1585, 1676], [1448, 1539, 1630], [1494, 1585], [1539]]
 
-        for positie in hand_posities[5 - len(hand)]:
-            if positie == x:
-                hand_index = hand_posities[5 - len(hand)].index(x)
-                break
+        if x in hand_posities[5 - len(hand)]:
+            index = hand_posities[5 - len(hand)].index(x)
 
     stapelposities = [[590, 750, 422, 658], [780, 944, 422, 658], [975, 1137, 422, 658], [1165, 1331, 422, 658],
                 [589, 749, 799, 1039], [780, 943, 799, 1039], [972, 1137, 799, 1039], [1165, 1330, 799, 1039]]
-
     for stapel in stapelposities:
         if stapel[0] <= stapel_x <= stapel[1] and stapel[2] <= stapel_y <= stapel[3]:
-            return hand_index, stapelposities.index(stapel)
+            return index, stapelposities.index(stapel)
 
 def drag(widget, window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand):
     widget.bind("<ButtonRelease-1>",
@@ -32,34 +32,40 @@ def on_drop(event, window, bouwstapels, mens_weggooistapels, comp_weggooistapels
     x, y = event.widget.winfo_pointerxy()
     target = event.widget.winfo_containing(x, y)
 
-    # try:
-    target.configure(image=event.widget.cget("image"))
+    try:
+        target.configure(image=event.widget.cget("image"))
 
-    x, y = position()
-    hand_index, stapel = check_widget(mens_hand, event.widget.winfo_x(), x, y)
+        x, y = position()
+        index, stapel = check_widget(mens_hand, event.widget.winfo_x(), x, y)
 
-    keys = ['A', 'B', 'C', 'D']
-    if hand_index == 5:
-        if bovenste_kaart_bouwstapel(bouwstapels[keys[stapel]]) + 1 == mens_stok[0] or mens_stok[0] == "SB":
-            print("Kaart {} uit de stok naar bouwstapel {}".format(mens_stok[0], keys[stapel]))
-            bouwstapels[keys[stapel]].append(mens_stok[0])
-            mens_stok = mens_stok[1:]
+        keys = ['A', 'B', 'C', 'D']
+        if index == 5:
+            if bovenste_kaart_bouwstapel(bouwstapels[keys[stapel]]) + 1 == mens_stok[0] or mens_stok[0] == "SB":
+                print("Kaart {} uit de stok naar bouwstapel {}".format(mens_stok[0], keys[stapel]))
+                bouwstapels[keys[stapel]].append(mens_stok[0])
+                mens_stok = mens_stok[1:]
+        elif index >= 6:
+            if bovenste_kaart_bouwstapel(bouwstapels[keys[stapel]]) + 1 == mens_weggooistapels[keys[index - 6]][-1] or \
+                    mens_weggooistapels[keys[index - 6]][-1] == "SB":
+                print("Kaart {} uit weggooistapel {} naar bouwstapel {}".format(mens_weggooistapels[keys[index - 6]][-1],
+                                                                                keys[index - 6], keys[stapel]))
+                bouwstapels[keys[stapel]].append(mens_weggooistapels[keys[index - 6]][-1])
+                mens_weggooistapels[keys[index - 6]] = mens_weggooistapels[keys[index - 6]][:-1]
+        elif stapel <= 3 and index < 5:
+            if bovenste_kaart_bouwstapel(bouwstapels[keys[stapel]]) + 1 == mens_hand[index] or mens_hand[index] == "SB":
+                print("Kaart {} uit de hand naar bouwstapel {}".format(mens_hand[index], keys[stapel]))
+                bouwstapels[keys[stapel]].append(mens_hand[index])
+                mens_hand = mens_hand[:index] + mens_hand[index + 1:]
+        elif 4 <= stapel <= 7 and index < 5:
+            print("Kaart {} uit de hand naar weggooistapel {}".format(mens_hand[index], keys[stapel - 4]))
+            mens_weggooistapels[keys[stapel - 4]].append(mens_hand[index])
+            mens_hand = mens_hand[:index] + mens_hand[index + 1:]
 
-    elif stapel <= 3 and hand_index < 5:
-        if bovenste_kaart_bouwstapel(bouwstapels[keys[stapel]]) + 1 == mens_hand[hand_index] or mens_hand[hand_index] == "SB":
-            print("Kaart {} uit de hand naar bouwstapel {}".format(mens_hand[hand_index], keys[stapel]))
-            bouwstapels[keys[stapel]].append(mens_hand[hand_index])
-            mens_hand = mens_hand[:hand_index] + mens_hand[hand_index + 1:]
-    elif 4 <= stapel <= 7 and hand_index < 5:
-        print("Kaart {} uit de hand naar weggooistapel {}".format(mens_hand[hand_index], keys[stapel - 4]))
-        mens_weggooistapels[keys[stapel - 4]].append(mens_hand[hand_index])
-        mens_hand = mens_hand[:hand_index] + mens_hand[hand_index + 1:]
-
-    window.destroy()
-    window = tk.Tk(className=' Skip-Bo')
-    update_gui(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand)
-    # except:
-    #     pass
+        window.destroy()
+        window = tk.Tk(className=' Skip-Bo')
+        update_gui(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand)
+    except:
+        pass
 
 def hover(label, on_hover, on_leave):
     label.bind("<Enter>", func=lambda x: label.config(background=on_hover))
@@ -108,12 +114,14 @@ def stapels_maken(window, speler, bouwstapels, mens_weggooistapels, comp_weggooi
             open_image(window, "Images/Trekstapel.png", False, "grid", speler, column, 100, None, None)
         # Stok
         elif speler != 2 and temp_column == 2:
-            label = open_image(window, "Images/{}/{} ({}).png".format(stok[0], stok[0], 5 if (len(stok) > 5) else len(stok)),
-                       True if (speler == 1) else False, "grid", speler, column, 100, 40,
-                       "n" if (speler == 1) else (None if (speler == 2) else "s"))
+            label = open_image(window,
+                               "Images/{}/{} ({}).png".format(stok[0], stok[0], 5 if (len(stok) > 5) else len(stok)),
+                               True if (speler == 1) else False, "grid", speler, column, 100, 40,
+                               "n" if (speler == 1) else (None if (speler == 2) else "s"))
             if speler == 3 and mogelijkheid(stok[0], bouwstapels):
                 hover(label, "red", "#d6e0f5")
-                drag(label, window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand)
+                drag(label, window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok,
+                     mens_hand, comp_hand)
         # Bouw en weggooistapels
         else:
             stapel = stapels[['A', 'B', 'C', 'D'][6 - (9 - column if (speler != 1) else column)]]
@@ -125,6 +133,8 @@ def stapels_maken(window, speler, bouwstapels, mens_weggooistapels, comp_weggooi
                                "n" if (speler == 1) else (None if (speler == 2) else "s"))
             if speler == 3 and (len(stapel) > 0 and mogelijkheid(stapel[-1], bouwstapels)):
                 hover(label, "red", "#d6e0f5")
+                drag(label, window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok,
+                     mens_hand, comp_hand)
 
 def hand_maken(window, speler, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand):
     hand = comp_hand if (speler == 1) else mens_hand
