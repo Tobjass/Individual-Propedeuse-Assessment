@@ -152,6 +152,14 @@ def hand_maken(window, speler, bouwstapels, mens_weggooistapels, comp_weggooista
 def update_gui(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand, mens_beurt, trekstapel):
     check_bouwstapels(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand, mens_beurt, trekstapel)
 
+    if len(mens_hand) == 0:
+        mens_hand, trekstapel = trek_kaarten(mens_hand, trekstapel)
+
+        window.destroy()
+        window = tk.Tk(className=' Skip-Bo')
+        update_gui(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand,
+                   comp_hand, True, trekstapel)
+
     window.attributes('-fullscreen', True)
     window.configure(background="#d6e0f5")
 
@@ -245,6 +253,8 @@ def run_algoritme(window, bouwstapels, mens_weggooistapels, comp_weggooistapels,
 
     mens_hand, trekstapel = trek_kaarten(mens_hand, trekstapel)
 
+    window.destroy()
+    window = tk.Tk(className=' Skip-Bo')
     update_gui(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand,
                comp_hand, True, trekstapel)
 
