@@ -5,21 +5,25 @@ from pyautogui import position
 
 # Grafical User Interface
 def check_widget(hand, x, stapel_x, stapel_y):
-    print(x)
+    weggooistapel_posities = [[584, 585, 586, 587, 588], [777, 778, 779, 780, 781], [969, 970, 971, 972, 973],
+                              [1161, 1162, 1163, 1164, 1165]]
 
-    weggooistapel_posities = [586, 779, 971, 972, 1163]
     if x == 298:
         index = 5
-    elif x in weggooistapel_posities:
-        index = 6 + weggooistapel_posities.index(x)
+    elif x in weggooistapel_posities[0] + weggooistapel_posities[1] + weggooistapel_posities[2] + \
+            weggooistapel_posities[3]:
+        for weggooistapel in weggooistapel_posities:
+            if x in weggooistapel:
+                index = 6 + weggooistapel_posities.index(weggooistapel)
     else:
-        hand_posities = [[1357, 1448, 1539, 1630, 1721], [1403, 1494, 1585, 1676], [1448, 1539, 1630], [1494, 1585], [1539]]
+        hand_posities = [[1357, 1448, 1539, 1630, 1721], [1403, 1494, 1585, 1676], [1448, 1539, 1630], [1494, 1585],
+                         [1539]]
 
         if x in hand_posities[5 - len(hand)]:
             index = hand_posities[5 - len(hand)].index(x)
 
     stapelposities = [[590, 750, 422, 658], [780, 944, 422, 658], [975, 1137, 422, 658], [1165, 1331, 422, 658],
-                [589, 749, 799, 1039], [780, 943, 799, 1039], [972, 1137, 799, 1039], [1165, 1330, 799, 1039]]
+                      [589, 749, 799, 1039], [780, 943, 799, 1039], [972, 1137, 799, 1039], [1165, 1330, 799, 1039]]
     for stapel in stapelposities:
         if stapel[0] <= stapel_x <= stapel[1] and stapel[2] <= stapel_y <= stapel[3]:
             return index, stapelposities.index(stapel)
