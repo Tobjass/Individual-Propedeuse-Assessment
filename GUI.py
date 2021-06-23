@@ -4,6 +4,9 @@ from random import shuffle
 from pyautogui import position
 
 # Grafical User Interface
+"""
+Controleert waar de gesleepte kaart vandaan komt en op welke stapel deze moet komen te liggen d.m.v. x en y coördinaten.
+"""
 def check_widget(hand, x, stapel_x, stapel_y):
     weggooistapel_posities = [[584, 585, 586, 587, 588], [777, 778, 779, 780, 781], [969, 970, 971, 972, 973],
                               [1161, 1162, 1163, 1164, 1165]]
@@ -29,12 +32,18 @@ def check_widget(hand, x, stapel_x, stapel_y):
             return index, stapelposities.index(stapel)
     return -1, -1
 
+"""
+Maakt een widget sleepbaar.
+"""
 def drag(widget, window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand, trekstapel):
     widget.bind("<ButtonRelease-1>",
                 lambda event: on_drop(event, window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok,
                                       comp_stok, mens_hand, comp_hand, trekstapel))
     widget.configure(cursor="hand2")
 
+"""
+Legt d.m.v. check_widget() de gesleepte kaart op de juiste stapel, en update de GUI daarna.
+"""
 def on_drop(event, window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand, trekstapel):
     x, y = event.widget.winfo_pointerxy()
     target = event.widget.winfo_containing(x, y)
@@ -78,10 +87,16 @@ def on_drop(event, window, bouwstapels, mens_weggooistapels, comp_weggooistapels
     # except:
     #     pass
 
+"""
+Maakt de achtergrond van een kaart rood als de muis er op zit.
+"""
 def hover(label, on_hover, on_leave):
     label.bind("<Enter>", func=lambda x: label.config(background=on_hover))
     label.bind("<Leave>", func=lambda x: label.config(background=on_leave))
 
+"""
+Opent een kaart-foto en past deze toe op de GUI
+"""
 def open_image(window, bestand, rotate, setting, row, column, padx, pady, sticky):
     image = Image.open(bestand)
     image = ImageTk.PhotoImage(image.rotate(180 if (rotate) else 0))
@@ -95,12 +110,18 @@ def open_image(window, bestand, rotate, setting, row, column, padx, pady, sticky
                     y=40 if (column == 1) else 801)
     return label
 
+"""
+Controleert of de kaart gebruikt kan worden.
+"""
 def mogelijkheid(kaart, bouwstapels):
     for stapel in bouwstapels:
         if bovenste_kaart_bouwstapel(bouwstapels[stapel]) + 1 == kaart or kaart == "SB":
             return True
     return False
 
+"""
+Het aanmaken van de stapels voor de GUI.
+"""
 def stapels_maken(window, speler, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand, mens_beurt, trekstapel):
     stapels = comp_weggooistapels if (speler == 1) else (bouwstapels if (speler == 2) else mens_weggooistapels)
     stok = comp_stok if (speler == 1) else mens_stok
@@ -149,6 +170,9 @@ def stapels_maken(window, speler, bouwstapels, mens_weggooistapels, comp_weggooi
                 drag(label, window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok,
                      mens_hand, comp_hand, trekstapel)
 
+"""
+Het aanmaken van de 5 (of minder) kaarten in de hand voor de GUI.
+"""
 def hand_maken(window, speler, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand, mens_beurt, trekstapel):
     hand = comp_hand if (speler == 1) else mens_hand
     for kaart in range(1, len(hand) + 1):
@@ -160,6 +184,10 @@ def hand_maken(window, speler, bouwstapels, mens_weggooistapels, comp_weggooista
             drag(label, window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand,
                  comp_hand, trekstapel)
 
+"""
+Het updaten van de GUI, deze bouwt de stapels en hand opnieuw op. Ook wordt het algoritme vanuit hier gebruikt als de 
+beurt van de speler afgelopen is.
+"""
 def update_gui(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand, mens_beurt, trekstapel):
     win = False
     if len(comp_stok) == 0 or len(mens_stok) == 0:
@@ -196,9 +224,16 @@ def update_gui(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, me
                       comp_hand, trekstapel)
 
 # Overige functies
+"""
+Bepaald aantal kaarten van de trekstapel af halen en aan een lijst toevoegen.
+"""
 def kaart_van_trekstapel(trekstapel, aantal):
     return trekstapel[:aantal], trekstapel[aantal:]
 
+"""
+Het instellen van de benodigde lijsten, d.m.v. shuffle() voor de trekstapel en kaart_van_trekstapel() voor de stok en 
+mens_hand.
+"""
 def instellen():
     trekstapel = [x % 12 + 1 for x in range(0, 144)]
     trekstapel += ["SB"] * 18
@@ -214,6 +249,9 @@ def instellen():
 
     return trekstapel, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, []
 
+"""
+Returnt de bovenste kaart van de bouwstapel als int, ook als de bovenste een Skip-Bo kaart is.
+"""
 def bovenste_kaart_bouwstapel(bouwstapel):
     if not bouwstapel:
         return 0
@@ -224,6 +262,9 @@ def bovenste_kaart_bouwstapel(bouwstapel):
     else:
         return bouwstapel[-1]
 
+"""
+Voegt een aantal kaarten aan de hand toe om er weer 5 van te maken.
+"""
 def trek_kaarten(hand, trekstapel):
     index = 5 - len(hand)
     if index > 0:
@@ -232,6 +273,9 @@ def trek_kaarten(hand, trekstapel):
         trekstapel = trekstapel[index:]
     return hand, trekstapel
 
+"""
+Controleert of een bouwstapel geleegd moet worden (als het 12 behaald heeft).
+"""
 def check_bouwstapels(bouwstapels, trekstapel):
     for stapel in bouwstapels:
         if bovenste_kaart_bouwstapel(bouwstapels[stapel]) == 12:
@@ -243,6 +287,11 @@ def check_bouwstapels(bouwstapels, trekstapel):
     return bouwstapels, trekstapel
 
 # Algoritme
+"""
+Runnen van het algoritme, hier wordt de hand bijgevuld, berekent welke stapel het dichtste bij de stok is, of er een pad 
+mogelijk is, en zo ja deze toepassen. Als er geen pad meer mogelijk is wordt er een kaart afgelegd en is de mens weer 
+aan de beurt.
+"""
 def run_algoritme(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand, trekstapel):
     comp_hand, trekstapel = trek_kaarten(comp_hand, trekstapel)
 
@@ -273,6 +322,9 @@ def run_algoritme(window, bouwstapels, mens_weggooistapels, comp_weggooistapels,
     update_gui(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand,
                comp_hand, mens_beurt, trekstapel)
 
+"""
+Berekent welke weggooistapel de minste kaarten heeft, om later een kaart op te kunnen gooien.
+"""
 def kleinste_weggooistapel(comp_weggooistapels):
     if len(comp_weggooistapels['A']) == len(comp_weggooistapels['B']) and len(comp_weggooistapels['B']) == len(
             comp_weggooistapels['C']) and len(comp_weggooistapels['C']) == len(comp_weggooistapels['D']):
@@ -285,6 +337,9 @@ def kleinste_weggooistapel(comp_weggooistapels):
             kleinste = stapel
     return kleinste
 
+"""
+Controleert of alle kaarten in de weggooistapel hetzelfde zijn.
+"""
 def check_weggooistapel(stapel):
     gelijk = stapel[-1]
     for kaart in stapel:
@@ -292,6 +347,15 @@ def check_weggooistapel(stapel):
             return False
     return True
 
+"""
+Het wegleggen van een kaart (beurt eindigen). 
+- Optie 1: Als alle kaarten in een weggooistapel hetzelfde zijn en deze in de hand aanwezig is, wordt deze hierbij gegooid. 
+- Optie 2: Als de stapel leeg is wordt er een kaart die dubbel aanwezig is in de hand opgegooid.
+- Optie 3: Als de kaart die 1 kleiner is dan de bovenste kaart van de weggooistapel aanwezig is in de hand, wordt deze 
+    hierbij gegooid, om later een 'chain' te kunnen vormen
+- Optie 4: Als de vorige opties allemaal niet mogelijk zijn wordt de eerste kaart uit de hand die geen Skip-Bo kaart is 
+    aan de kleinste weggooistapel toegevoegd
+"""
 def kaart_wegleggen(comp_hand, comp_weggooistapels):
     index = None
     for optie in range(4):
@@ -331,6 +395,9 @@ def kaart_wegleggen(comp_hand, comp_weggooistapels):
     comp_hand = comp_hand[:index] + comp_hand[index + 1:]
     return comp_hand, comp_weggooistapels
 
+"""
+Controleert of de benodigde kaart in een weggooistapel aanwezig is.
+"""
 def check_weggooistapels(comp_weggooistapels, kaart):
     for stapel in comp_weggooistapels:
         if not comp_weggooistapels[stapel]:
@@ -339,6 +406,9 @@ def check_weggooistapels(comp_weggooistapels, kaart):
             return True, stapel
     return False, None
 
+"""
+Voegt de kaarten uit de hand en beschikbare kaarten uit de weggooistapels bij elkaar.
+"""
 def beschikbare_kaarten(comp_hand, comp_weggooistapels):
     temp = comp_hand.copy()
     for stapel in comp_weggooistapels:
@@ -346,6 +416,10 @@ def beschikbare_kaarten(comp_hand, comp_weggooistapels):
             temp.append(comp_weggooistapels[stapel][-1])
     return temp
 
+"""
+Stapel die het dichtste bij de stok kaart is berekenen. Als de stok kaart een Skip-Bo kaart is wordt deze als kaart 
+gebruikt die niet aanwezig is in de hand en weggooistapels
+"""
 def dichtste_bij_stok(bouwstapels, comp_stok, comp_hand, comp_weggooistapels):
     if comp_stok[0] == "SB":
         for stapel in bouwstapels:
@@ -366,6 +440,10 @@ def dichtste_bij_stok(bouwstapels, comp_stok, comp_hand, comp_weggooistapels):
             meest_dichtbij = stapel
     return meest_dichtbij
 
+"""
+Maken van een pad naar de stok kaart. Als het pad niet helemaal naar de stok loopt, het uiteindelijke verschil kleiner 
+is dan 3, en de kaart van de mens stok te dichtbij komt, wordt het pad niet toegepast.  
+"""
 def pad_maken(bouwstapels, mens_stok, comp_stok, comp_hand, comp_weggooistapels):
     if comp_stok[0] == "SB":
         return [["stok", 0]]
@@ -403,11 +481,13 @@ def pad_maken(bouwstapels, mens_stok, comp_stok, comp_hand, comp_weggooistapels)
             continue
         break
 
-    print(f"\n{verschil-1 = }\n{len(pad) = }\n{comp_hand = }\n{mens_verschil-1 = }\n")
     if verschil - 1 != len(pad) and verschil - 1 - len(pad) < 3 and mens_verschil - 1 - len(pad) < 3:
         pad = []
     return pad
 
+"""
+Het toepassen van het pad op de bouwstapel die het dichtste bij de stok kaart is.
+"""
 def pad_toepassen(pad, bouwstapels, dichtste_bij, comp_stok, comp_hand, comp_weggooistapels, trekstapel):
     for stap in pad:
         bouwstapels, trekstapel, check_bouwstapels(bouwstapels, trekstapel)
@@ -428,6 +508,9 @@ def pad_toepassen(pad, bouwstapels, dichtste_bij, comp_stok, comp_hand, comp_weg
     return bouwstapels, comp_stok, comp_hand, comp_weggooistapels, trekstapel
 
 # Main functie
+"""
+Runnen van de applicatie
+"""
 def run(window):
     trekstapel, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand = instellen()
 
