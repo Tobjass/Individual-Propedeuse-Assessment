@@ -47,6 +47,13 @@ def kleinste_weggooistapel(comp_weggooistapels):
             kleinste = stapel
     return kleinste
 
+def check_weggooistapel(stapel):
+    gelijk = stapel[-1]
+    for kaart in stapel:
+        if kaart != gelijk:
+            return False
+    return True
+
 #Test functies
 def test_bovenste_kaart_bouwstapel():
     assert bovenste_kaart_bouwstapel([1, 2, 3, "SB"]) == 4, "Moet 4 zijn"
@@ -82,6 +89,10 @@ def test_check_bouwstapels(trekstapel):
 def test_kleinste_weggooistapel():
     assert kleinste_weggooistapel({'A': [11, 11, 11], 'B': [10, 9], 'C': [7], 'D': [8, 8]}) == 'C', "Moet C zijn"
 
+def test_check_weggooistapel():
+    assert check_weggooistapel([11, 11]) is True, "Moet True zijn"
+    assert check_weggooistapel([6, 6, 5]) is False, "Moet False zijn"
+
 trekstapel = [6, 7, 'SB', 6, 'SB', 7, 8, 6, 12, 4, 4, 'SB', 10, 5, 3, 6, 6, 1, 9, 'SB', 1, 1, 5, 7, 'SB', 3, 1, 4,
                   8, 7, 12, 8, 10, 9, 2, 1, 2, 10, 5, 1, 8, 10, 1, 5, 9, 2, 11, 4, 10, 7, 7, 'SB', 8, 'SB', 3, 8, 5,
                   'SB', 6, 10, 11, 12, 9, 6, 'SB', 3, 10, 9, 4, 2, 11, 7, 1, 8, 8, 9, 11, 6, 3, 12, 4, 2, 'SB', 4, 8, 1,
@@ -95,4 +106,5 @@ test_kaart_van_trekstapel(trekstapel)
 test_trek_kaarten(trekstapel)
 test_check_bouwstapels(trekstapel)
 test_kleinste_weggooistapel()
+test_check_weggooistapel()
 print("Tests succesvol")
