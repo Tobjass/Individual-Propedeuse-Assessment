@@ -1,3 +1,4 @@
+#Functies uit GUI.py
 def bovenste_kaart_bouwstapel(bouwstapel):
     if not bouwstapel:
         return 0
@@ -34,6 +35,19 @@ def check_bouwstapels(bouwstapels, trekstapel):
             bouwstapels[stapel] = []
     return bouwstapels, trekstapel
 
+def kleinste_weggooistapel(comp_weggooistapels):
+    if len(comp_weggooistapels['A']) == len(comp_weggooistapels['B']) and len(comp_weggooistapels['B']) == len(
+            comp_weggooistapels['C']) and len(comp_weggooistapels['C']) == len(comp_weggooistapels['D']):
+        return 'A'
+    len_kleinste = 100
+    kleinste = None
+    for stapel in comp_weggooistapels:
+        if len(comp_weggooistapels[stapel]) < len_kleinste:
+            len_kleinste = len(comp_weggooistapels[stapel])
+            kleinste = stapel
+    return kleinste
+
+#Test functies
 def test_bovenste_kaart_bouwstapel():
     assert bovenste_kaart_bouwstapel([1, 2, 3, "SB"]) == 4, "Moet 4 zijn"
 
@@ -65,6 +79,9 @@ def test_check_bouwstapels(trekstapel):
                              trekstapel) == ({'A': [1, 2], 'B': [], 'C': [1, 2, "SB"], 'D': [1, 2, 3, 4, "SB"]},
                                              nieuwe_trekstapel), "Bouwstapel B moet leeg zijn"
 
+def test_kleinste_weggooistapel():
+    assert kleinste_weggooistapel({'A': [11, 11, 11], 'B': [10, 9], 'C': [7], 'D': [8, 8]}) == 'C', "Moet C zijn"
+
 trekstapel = [6, 7, 'SB', 6, 'SB', 7, 8, 6, 12, 4, 4, 'SB', 10, 5, 3, 6, 6, 1, 9, 'SB', 1, 1, 5, 7, 'SB', 3, 1, 4,
                   8, 7, 12, 8, 10, 9, 2, 1, 2, 10, 5, 1, 8, 10, 1, 5, 9, 2, 11, 4, 10, 7, 7, 'SB', 8, 'SB', 3, 8, 5,
                   'SB', 6, 10, 11, 12, 9, 6, 'SB', 3, 10, 9, 4, 2, 11, 7, 1, 8, 8, 9, 11, 6, 3, 12, 4, 2, 'SB', 4, 8, 1,
@@ -77,4 +94,5 @@ test_mogelijkheid()
 test_kaart_van_trekstapel(trekstapel)
 test_trek_kaarten(trekstapel)
 test_check_bouwstapels(trekstapel)
+test_kleinste_weggooistapel()
 print("Tests succesvol")
