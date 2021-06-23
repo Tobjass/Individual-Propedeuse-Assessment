@@ -166,6 +166,21 @@ def pad_maken(bouwstapels, mens_stok, comp_stok, comp_hand, comp_weggooistapels)
         pad = []
     return pad
 
+def pad_toepassen(pad, bouwstapels, dichtste_bij, comp_stok, comp_hand, comp_weggooistapels, trekstapel):
+    for stap in pad:
+        bouwstapels, trekstapel, check_bouwstapels(bouwstapels, trekstapel)
+
+        if stap[0] == "stok":
+            bouwstapels[dichtste_bij].append(comp_stok[stap[1]])
+            comp_stok = comp_stok[1:]
+        elif stap[0] == "hand":
+            bouwstapels[dichtste_bij].append(comp_hand[stap[1]])
+            comp_hand = comp_hand[:stap[1]] + comp_hand[stap[1] + 1:]
+        elif stap[0] == "weggooistapel":
+            bouwstapels[dichtste_bij].append(comp_weggooistapels[stap[1]][-1])
+            comp_weggooistapels[stap[1]] = comp_weggooistapels[stap[1]][:-1]
+    return bouwstapels, comp_stok, comp_hand, comp_weggooistapels, trekstapel
+
 #Test functies
 def test_bovenste_kaart_bouwstapel():
     assert bovenste_kaart_bouwstapel([1, 2, 3, "SB"]) == 4, "Moet 4 zijn"
@@ -244,6 +259,15 @@ def test_pad_maken():
                      {'A': [6, 6, 5], 'B': [10, 9], 'C': [11, 11, 11], 'D': [7]}) == [['hand', 1], ['hand', 2], ['stok',
                         0]], "Moet [['hand', 1], ['hand', 2], ['stok', 0]] zijn"
 
+def test_pad_toepassen(trekstapel):
+    assert pad_toepassen([['hand', 1], ['hand', 2], ['stok', 0]],
+                         {'A': [1, 2, 3, 4, 5, 6, 7], 'B': [1, "SB", 3], 'C': [1], 'D': [1, 2, 3, 4, 5, 6, 7, 8]}, "B",
+                         [7, 2, 9, "SB", 11, 8, 12], [3, 5, 9, "SB", 7],
+                         {'A': [6, 6, 5], 'B': [10, 9], 'C': [11, 11, 11], 'D': [7]}, trekstapel) == (
+           {'A': [1, 2, 3, 4, 5, 6, 7], 'B': [1, 'SB', 3, 5, 'SB', 7], 'C': [1], 'D': [1, 2, 3, 4, 5, 6, 7, 8]},
+           [2, 9, 'SB', 11, 8, 12], [3, 9, 7], {'A': [6, 6, 5], 'B': [10, 9], 'C': [11, 11, 11], 'D': [7]},
+           trekstapel), "Klopt niet"
+
 trekstapel = [6, 7, 'SB', 6, 'SB', 7, 8, 6, 12, 4, 4, 'SB', 10, 5, 3, 6, 6, 1, 9, 'SB', 1, 1, 5, 7, 'SB', 3, 1, 4,
                   8, 7, 12, 8, 10, 9, 2, 1, 2, 10, 5, 1, 8, 10, 1, 5, 9, 2, 11, 4, 10, 7, 7, 'SB', 8, 'SB', 3, 8, 5,
                   'SB', 6, 10, 11, 12, 9, 6, 'SB', 3, 10, 9, 4, 2, 11, 7, 1, 8, 8, 9, 11, 6, 3, 12, 4, 2, 'SB', 4, 8, 1,
@@ -263,4 +287,5 @@ test_check_weggooistapels()
 test_beschikbare_kaarten()
 test_dichtste_bij_stok()
 test_pad_maken()
+test_pad_toepassen(trekstapel)
 print("Tests succesvol")
