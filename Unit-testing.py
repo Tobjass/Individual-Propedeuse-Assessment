@@ -162,7 +162,7 @@ def pad_maken(bouwstapels, mens_stok, comp_stok, comp_hand, comp_weggooistapels)
             continue
         break
 
-    if verschil - 1 != len(pad) and verschil - 1 - len(pad) < 3 and mens_verschil - 1 - len(pad) <= 3:
+    if verschil - 1 != len(pad) and (verschil - 1 - len(pad) < 3 or mens_verschil - 1 - len(pad) <= 3):
         pad = []
     return pad
 
