@@ -54,6 +54,42 @@ def check_weggooistapel(stapel):
             return False
     return True
 
+def kaart_wegleggen(comp_hand, comp_weggooistapels):
+    index = None
+    for optie in range(4):
+        for stapel in comp_weggooistapels:
+            if optie == 0 and (len(comp_weggooistapels[stapel]) > 0 and (
+                    check_weggooistapel(comp_weggooistapels[stapel]) and comp_weggooistapels[stapel][-1] in comp_hand)):
+                index = comp_hand.index(comp_weggooistapels[stapel][-1])
+                break
+            elif optie == 1 and len(comp_weggooistapels[stapel]) == 0:
+                for handoptie in range(2):
+                    for kaart in comp_hand:
+                        if (handoptie == 0 and (
+                                comp_hand.count(kaart) > 1 and kaart != "SB")) or handoptie == 1 and kaart != "SB":
+                            index = comp_hand.index(kaart)
+                            break
+                    if index is not None:
+                        break
+                break
+            elif optie == 2 and (len(comp_weggooistapels[stapel]) > 0 and comp_weggooistapels[stapel][-1] - 1 in comp_hand):
+                index = comp_hand.index(comp_weggooistapels[stapel][-1] - 1)
+                break
+            elif optie == 3:
+                index = 0
+                for kaart in comp_hand:
+                    if kaart != "SB":
+                        index = comp_hand.index(kaart)
+                        break
+                comp_weggooistapels[kleinste_weggooistapel(comp_weggooistapels)].append(comp_hand[index])
+                comp_hand = comp_hand[:index] + comp_hand[index + 1:]
+                return comp_hand, comp_weggooistapels
+        if index is not None:
+            break
+    comp_weggooistapels[stapel].append(comp_hand[index])
+    comp_hand = comp_hand[:index] + comp_hand[index + 1:]
+    return comp_hand, comp_weggooistapels
+
 #Test functies
 def test_bovenste_kaart_bouwstapel():
     assert bovenste_kaart_bouwstapel([1, 2, 3, "SB"]) == 4, "Moet 4 zijn"
@@ -93,6 +129,16 @@ def test_check_weggooistapel():
     assert check_weggooistapel([11, 11]) is True, "Moet True zijn"
     assert check_weggooistapel([6, 6, 5]) is False, "Moet False zijn"
 
+def test_kaart_wegleggen():
+    assert kaart_wegleggen([8, 3, 11, "SB", 3], {'A': [7, 8], 'B': [8, 8], 'C': [], 'D': []}) == (
+        [3, 11, "SB", 3], {'A': [7, 8], 'B': [8, 8, 8], 'C': [], 'D': []}), "Weggooistapel B moet [8, 8, 8] zijn"
+    assert kaart_wegleggen([8, 3, 11, "SB", 3], {'A': [], 'B': [], 'C': [], 'D': []}) == (
+        [8, 11, "SB", 3], {'A': [3], 'B': [], 'C': [], 'D': []}), "Weggooistapel A moet [3] zijn"
+    assert kaart_wegleggen([8, 3, 11, "SB", 3], {'A': [2], 'B': [5], 'C': [12], 'D': [10]}) == (
+        [8, 3, "SB", 3], {'A': [2], 'B': [5], 'C': [12, 11], 'D': [10]}), "Weggooistapel C moet [12, 11] zijn"
+    assert kaart_wegleggen([8, 3, 11, "SB", 3], {'A': [10, 10], 'B': [7, 7, 7], 'C': [5], 'D': [2, 2]}) == (
+        [3, 11, "SB", 3], {'A': [10, 10], 'B': [7, 7, 7], 'C': [5, 8], 'D': [2, 2]}), "Weggooistapel C moet [5, 8] zijn"
+
 trekstapel = [6, 7, 'SB', 6, 'SB', 7, 8, 6, 12, 4, 4, 'SB', 10, 5, 3, 6, 6, 1, 9, 'SB', 1, 1, 5, 7, 'SB', 3, 1, 4,
                   8, 7, 12, 8, 10, 9, 2, 1, 2, 10, 5, 1, 8, 10, 1, 5, 9, 2, 11, 4, 10, 7, 7, 'SB', 8, 'SB', 3, 8, 5,
                   'SB', 6, 10, 11, 12, 9, 6, 'SB', 3, 10, 9, 4, 2, 11, 7, 1, 8, 8, 9, 11, 6, 3, 12, 4, 2, 'SB', 4, 8, 1,
@@ -107,4 +153,5 @@ test_trek_kaarten(trekstapel)
 test_check_bouwstapels(trekstapel)
 test_kleinste_weggooistapel()
 test_check_weggooistapel()
+test_kaart_wegleggen()
 print("Tests succesvol")
