@@ -98,6 +98,13 @@ def check_weggooistapels(comp_weggooistapels, kaart):
             return True, stapel
     return False, None
 
+def beschikbare_kaarten(comp_hand, comp_weggooistapels):
+    temp = comp_hand.copy()
+    for stapel in comp_weggooistapels:
+        if len(comp_weggooistapels[stapel]) > 0:
+            temp.append(comp_weggooistapels[stapel][-1])
+    return temp
+
 #Test functies
 def test_bovenste_kaart_bouwstapel():
     assert bovenste_kaart_bouwstapel([1, 2, 3, "SB"]) == 4, "Moet 4 zijn"
@@ -153,6 +160,10 @@ def test_check_weggooistapels():
     assert check_weggooistapels({'A': [10, 10, 10], 'B': [7], 'C': [4], 'D': [8, 8]}, 6) == (
         False, None), "Moet (False, None) zijn"
 
+def test_beschikbare_kaarten():
+    assert beschikbare_kaarten([2, "SB", 8, 12, "SB"], {'A': [6, 6], 'B': [10, 9], 'C': [11, 11, 11], 'D': [7]}) == \
+           [2, 'SB', 8, 12, 'SB', 6, 9, 11, 7], "Moet [2, 'SB', 8, 12, 'SB', 6, 9, 11, 7] zijn"
+
 trekstapel = [6, 7, 'SB', 6, 'SB', 7, 8, 6, 12, 4, 4, 'SB', 10, 5, 3, 6, 6, 1, 9, 'SB', 1, 1, 5, 7, 'SB', 3, 1, 4,
                   8, 7, 12, 8, 10, 9, 2, 1, 2, 10, 5, 1, 8, 10, 1, 5, 9, 2, 11, 4, 10, 7, 7, 'SB', 8, 'SB', 3, 8, 5,
                   'SB', 6, 10, 11, 12, 9, 6, 'SB', 3, 10, 9, 4, 2, 11, 7, 1, 8, 8, 9, 11, 6, 3, 12, 4, 2, 'SB', 4, 8, 1,
@@ -169,4 +180,5 @@ test_kleinste_weggooistapel()
 test_check_weggooistapel()
 test_kaart_wegleggen()
 test_check_weggooistapels()
+test_beschikbare_kaarten()
 print("Tests succesvol")
