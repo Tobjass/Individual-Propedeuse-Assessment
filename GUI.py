@@ -212,7 +212,7 @@ def instellen():
     comp_stok, trekstapel = kaart_van_trekstapel(trekstapel, 30)
     mens_hand, trekstapel = kaart_van_trekstapel(trekstapel, 5)
 
-    return trekstapel, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, ["SB", 1], mens_hand, []
+    return trekstapel, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, []
 
 def bovenste_kaart_bouwstapel(bouwstapel):
     if not bouwstapel:
@@ -256,7 +256,7 @@ def run_algoritme(window, bouwstapels, mens_weggooistapels, comp_weggooistapels,
             comp_hand, trekstapel = trek_kaarten(comp_hand, trekstapel)
 
         dichtste_bij = dichtste_bij_stok(bouwstapels, comp_stok, comp_hand, comp_weggooistapels)
-        pad = pad_maken(bouwstapels, comp_stok, comp_hand, comp_weggooistapels)
+        pad = pad_maken(bouwstapels, mens_stok, comp_stok, comp_hand, comp_weggooistapels)
 
         if not pad:
             break
@@ -366,15 +366,18 @@ def dichtste_bij_stok(bouwstapels, comp_stok, comp_hand, comp_weggooistapels):
             meest_dichtbij = stapel
     return meest_dichtbij
 
-def pad_maken(bouwstapels, comp_stok, comp_hand, comp_weggooistapels):
+def pad_maken(bouwstapels, mens_stok, comp_stok, comp_hand, comp_weggooistapels):
     if comp_stok[0] == "SB":
         return [["stok", 0]]
 
     dichtste_bij = dichtste_bij_stok(bouwstapels, comp_stok, comp_hand, comp_weggooistapels)
     bovenste = bovenste_kaart_bouwstapel(bouwstapels[dichtste_bij])
     verschil = comp_stok[0] - bovenste + 1
+    mens_verschil = mens_stok[0] - bovenste + 1
 
     if verschil < 0:
+        verschil += 11
+    if mens_verschil < 0:
         verschil += 11
 
     temp_hand = comp_hand.copy()
@@ -399,6 +402,10 @@ def pad_maken(bouwstapels, comp_stok, comp_hand, comp_weggooistapels):
             temp_hand.remove("SB")
             continue
         break
+
+    print(f"\n{verschil-1 = }\n{len(pad) = }\n{comp_hand = }\n{mens_verschil-1 = }\n")
+    if verschil - 1 != len(pad) and verschil - 1 - len(pad) < 3 and mens_verschil - 1 - len(pad) < 3:
+        pad = []
     return pad
 
 def pad_toepassen(pad, bouwstapels, dichtste_bij, comp_stok, comp_hand, comp_weggooistapels, trekstapel):
