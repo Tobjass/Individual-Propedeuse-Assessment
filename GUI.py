@@ -131,7 +131,7 @@ def stapels_maken(window, speler, bouwstapels, mens_weggooistapels, comp_weggooi
                                    stok[0], stok[0], 5 if (len(stok) > 5) else len(stok))),
                                True if (speler == 1) else False, "grid", speler, column, 100, 40,
                                "n" if (speler == 1) else (None if (speler == 2) else "s"))
-            if speler == 3 and mogelijkheid(stok[0], bouwstapels) and mens_beurt:
+            if mens_beurt and speler == 3 and mogelijkheid(stok[0], bouwstapels):
                 hover(label, "red", "#d6e0f5")
                 drag(label, window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok,
                      mens_hand, comp_hand, trekstapel)
@@ -161,16 +161,16 @@ def hand_maken(window, speler, bouwstapels, mens_weggooistapels, comp_weggooista
                  comp_hand, trekstapel)
 
 def update_gui(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand, mens_beurt, trekstapel):
-    comp_win = False
-    if len(comp_stok) == 0:
-        comp_win = True
-        label = tk.Label(master=window, text="Computer heeft gewonnen", background="#d6e0f5",
-                         font=('Helvetica', 50, 'bold'))
-        label.place(x=540, y=300)
+    win = False
+    if len(comp_stok) == 0 or len(mens_stok) == 0:
+        win = True
+        label = tk.Label(master=window, text="{} wint".format("Computer" if (len(comp_stok) == 0) else "      Jij"),
+                         background="#d6e0f5", font=('Helvetica', 50, 'bold'))
+        label.place(x=725, y=300)
 
     bouwstapels, trekstapel = check_bouwstapels(bouwstapels, trekstapel)
 
-    if len(mens_hand) == 0 and mens_beurt:
+    if len(mens_hand) == 0 and mens_beurt and win is False:
         mens_hand, trekstapel = trek_kaarten(mens_hand, trekstapel)
 
         window.destroy()
@@ -185,15 +185,15 @@ def update_gui(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, me
         window.rowconfigure(speler, weight=1, minsize=50)
 
         stapels_maken(window, speler, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok,
-                      mens_hand, comp_hand, mens_beurt, trekstapel)
+                      mens_hand, comp_hand, True if (mens_beurt and win is False) else False, trekstapel)
 
         if (speler == 1 and len(comp_hand) > 0) or (speler == 3 and len(mens_hand) > 0):
             hand_maken(window, speler, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok,
-                       mens_hand, comp_hand, mens_beurt, trekstapel)
+                       mens_hand, comp_hand, True if (mens_beurt and win is False) else False, trekstapel)
 
-    if mens_beurt is False and comp_win is False:
+    if mens_beurt is False and win is False:
         run_algoritme(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand,
-                      comp_hand, mens_beurt, trekstapel)
+                      comp_hand, trekstapel)
 
 # Overige functies
 def kaart_van_trekstapel(trekstapel, aantal):
@@ -212,7 +212,7 @@ def instellen():
     comp_stok, trekstapel = kaart_van_trekstapel(trekstapel, 30)
     mens_hand, trekstapel = kaart_van_trekstapel(trekstapel, 5)
 
-    return trekstapel, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, ["SB", 1, 2, 3, 4, 5], mens_hand, []
+    return trekstapel, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, ["SB", 1], mens_hand, []
 
 def bovenste_kaart_bouwstapel(bouwstapel):
     if not bouwstapel:
@@ -243,7 +243,7 @@ def check_bouwstapels(bouwstapels, trekstapel):
     return bouwstapels, trekstapel
 
 # Algoritme
-def run_algoritme(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand, mens_beurt, trekstapel):
+def run_algoritme(window, bouwstapels, mens_weggooistapels, comp_weggooistapels, mens_stok, comp_stok, mens_hand, comp_hand, trekstapel):
     comp_hand, trekstapel = trek_kaarten(comp_hand, trekstapel)
 
     mens_beurt = True
@@ -265,7 +265,8 @@ def run_algoritme(window, bouwstapels, mens_weggooistapels, comp_weggooistapels,
             dichtste_bij, comp_stok, comp_hand, comp_weggooistapels, trekstapel)
 
     comp_hand, comp_weggooistapels = kaart_wegleggen(comp_hand, comp_weggooistapels)
-    mens_hand, trekstapel = trek_kaarten(mens_hand, trekstapel)
+    if len(comp_stok) > 0:
+        mens_hand, trekstapel = trek_kaarten(mens_hand, trekstapel)
 
     window.destroy()
     window = tk.Tk(className=' Skip-Bo')
