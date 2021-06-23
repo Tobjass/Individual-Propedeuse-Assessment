@@ -105,6 +105,26 @@ def beschikbare_kaarten(comp_hand, comp_weggooistapels):
             temp.append(comp_weggooistapels[stapel][-1])
     return temp
 
+def dichtste_bij_stok(bouwstapels, comp_stok, comp_hand, comp_weggooistapels):
+    if comp_stok[0] == "SB":
+        for stapel in bouwstapels:
+            if bovenste_kaart_bouwstapel(bouwstapels[stapel]) + 1 in beschikbare_kaarten(comp_hand,
+                                                                                         comp_weggooistapels):
+                continue
+            elif bovenste_kaart_bouwstapel(bouwstapels[stapel]) + 1 not in beschikbare_kaarten(comp_hand, comp_weggooistapels):
+                return stapel
+        return 'A'
+
+    kleinste_verschil = 13
+    for stapel in bouwstapels:
+        verschil = comp_stok[0] - bovenste_kaart_bouwstapel(bouwstapels[stapel])
+        if verschil <= 0:
+            verschil += 12
+        if verschil < kleinste_verschil:
+            kleinste_verschil = verschil
+            meest_dichtbij = stapel
+    return meest_dichtbij
+
 #Test functies
 def test_bovenste_kaart_bouwstapel():
     assert bovenste_kaart_bouwstapel([1, 2, 3, "SB"]) == 4, "Moet 4 zijn"
@@ -164,6 +184,16 @@ def test_beschikbare_kaarten():
     assert beschikbare_kaarten([2, "SB", 8, 12, "SB"], {'A': [6, 6], 'B': [10, 9], 'C': [11, 11, 11], 'D': [7]}) == \
            [2, 'SB', 8, 12, 'SB', 6, 9, 11, 7], "Moet [2, 'SB', 8, 12, 'SB', 6, 9, 11, 7] zijn"
 
+def test_dichtste_bij_stok():
+    assert dichtste_bij_stok(
+        {'A': [1, 2, 3, 4, 5, 6], 'B': [1, "SB", 3], 'C': [1, 2, 3, 4], 'D': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]},
+        ["SB", 2, 9, 6, 11, 8, 12], [5, 7, 3, 9, "SB"],
+        {'A': [6, 6], 'B': [10, 9], 'C': [11, 11, 11], 'D': [7]}) == "B", "Moet B zijn"
+    assert dichtste_bij_stok(
+        {'A': [1, 2, 3, 4, 5, 6], 'B': [1, "SB", 3], 'C': [1, 2, 3, 4], 'D': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]},
+        [6, 2, 9, "SB", 11, 8, 12], [5, 7, 3, 9, "SB"],
+        {'A': [6, 6], 'B': [10, 9], 'C': [11, 11, 11], 'D': [7]}) == "C", "Moet C zijn"
+
 trekstapel = [6, 7, 'SB', 6, 'SB', 7, 8, 6, 12, 4, 4, 'SB', 10, 5, 3, 6, 6, 1, 9, 'SB', 1, 1, 5, 7, 'SB', 3, 1, 4,
                   8, 7, 12, 8, 10, 9, 2, 1, 2, 10, 5, 1, 8, 10, 1, 5, 9, 2, 11, 4, 10, 7, 7, 'SB', 8, 'SB', 3, 8, 5,
                   'SB', 6, 10, 11, 12, 9, 6, 'SB', 3, 10, 9, 4, 2, 11, 7, 1, 8, 8, 9, 11, 6, 3, 12, 4, 2, 'SB', 4, 8, 1,
@@ -181,4 +211,5 @@ test_check_weggooistapel()
 test_kaart_wegleggen()
 test_check_weggooistapels()
 test_beschikbare_kaarten()
+test_dichtste_bij_stok()
 print("Tests succesvol")
