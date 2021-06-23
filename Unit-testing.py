@@ -125,6 +125,47 @@ def dichtste_bij_stok(bouwstapels, comp_stok, comp_hand, comp_weggooistapels):
             meest_dichtbij = stapel
     return meest_dichtbij
 
+def pad_maken(bouwstapels, mens_stok, comp_stok, comp_hand, comp_weggooistapels):
+    if comp_stok[0] == "SB":
+        return [["stok", 0]]
+
+    dichtste_bij = dichtste_bij_stok(bouwstapels, comp_stok, comp_hand, comp_weggooistapels)
+    bovenste = bovenste_kaart_bouwstapel(bouwstapels[dichtste_bij])
+    verschil = comp_stok[0] - bovenste + 1
+    mens_verschil = mens_stok[0] - bovenste + 1
+
+    if verschil < 0:
+        verschil += 11
+    if mens_verschil < 0:
+        verschil += 11
+
+    temp_hand = comp_hand.copy()
+    temp_weggooistapels = comp_weggooistapels.copy()
+
+    pad = []
+    for kaart in range(1, verschil):
+        if bovenste + kaart == comp_stok[0]:
+            pad.append(["stok", 0])
+            break
+        if bovenste + kaart in temp_hand:
+            pad.append(["hand", temp_hand.index(bovenste + kaart)])
+            temp_hand.remove(bovenste + kaart)
+            continue
+        weggooistapel = check_weggooistapels(temp_weggooistapels, bovenste + kaart)
+        if weggooistapel[0]:
+            pad.append(["weggooistapel", weggooistapel[1]])
+            temp_weggooistapels[weggooistapel[1]] = temp_weggooistapels[weggooistapel[1]][:-1]
+            continue
+        elif "SB" in temp_hand:
+            pad.append(["hand", temp_hand.index("SB")])
+            temp_hand.remove("SB")
+            continue
+        break
+
+    if verschil - 1 != len(pad) and verschil - 1 - len(pad) < 3 and mens_verschil - 1 - len(pad) <= 3:
+        pad = []
+    return pad
+
 #Test functies
 def test_bovenste_kaart_bouwstapel():
     assert bovenste_kaart_bouwstapel([1, 2, 3, "SB"]) == 4, "Moet 4 zijn"
@@ -194,6 +235,15 @@ def test_dichtste_bij_stok():
         [6, 2, 9, "SB", 11, 8, 12], [5, 7, 3, 9, "SB"],
         {'A': [6, 6], 'B': [10, 9], 'C': [11, 11, 11], 'D': [7]}) == "C", "Moet C zijn"
 
+def test_pad_maken():
+    assert pad_maken({'A': [1, 2, 3, 4, 5, 6, 7], 'B': [1, "SB", 3], 'C': [1], 'D': [1, 2, 3, 4, 5, 6, 7, 8]},
+                     [8, 11, 3, 9, "SB", 7, 2, 8], [7, 2, 9, "SB", 11, 8, 12], [3, 5, 9, "SB", 7],
+                     {'A': [6, 6, 5], 'B': [10, 9], 'C': [11, 11, 11], 'D': [7]}) == [], "Moet [] zijn"
+    assert pad_maken({'A': [1, 2, 3, 4, 5, 6, 7], 'B': [1, "SB", 3, 4], 'C': [1], 'D': [1, 2, 3, 4, 5, 6, 7, 8]},
+                     [6, 11, 3, 9, "SB", 7, 2, 8], [7, 2, 9, "SB", 11, 8, 12], [3, 5, 9, "SB", 7],
+                     {'A': [6, 6, 5], 'B': [10, 9], 'C': [11, 11, 11], 'D': [7]}) == [['hand', 1], ['hand', 2], ['stok',
+                        0]], "Moet [['hand', 1], ['hand', 2], ['stok', 0]] zijn"
+
 trekstapel = [6, 7, 'SB', 6, 'SB', 7, 8, 6, 12, 4, 4, 'SB', 10, 5, 3, 6, 6, 1, 9, 'SB', 1, 1, 5, 7, 'SB', 3, 1, 4,
                   8, 7, 12, 8, 10, 9, 2, 1, 2, 10, 5, 1, 8, 10, 1, 5, 9, 2, 11, 4, 10, 7, 7, 'SB', 8, 'SB', 3, 8, 5,
                   'SB', 6, 10, 11, 12, 9, 6, 'SB', 3, 10, 9, 4, 2, 11, 7, 1, 8, 8, 9, 11, 6, 3, 12, 4, 2, 'SB', 4, 8, 1,
@@ -212,4 +262,5 @@ test_kaart_wegleggen()
 test_check_weggooistapels()
 test_beschikbare_kaarten()
 test_dichtste_bij_stok()
+test_pad_maken()
 print("Tests succesvol")
